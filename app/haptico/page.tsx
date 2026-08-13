@@ -1,132 +1,207 @@
 'use client';
 
 import React, { useState } from 'react';
-import { HandMetal, Play, Square, ArrowLeft } from 'lucide-react';
-import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { supabase } from '@/lib/supabase';
+import { Activity, BookOpen, Settings, LogOut, Menu, X, Play, Square, AlertTriangle } from 'lucide-react';
 
-// Diccionario Morse simplificado (Coste 0, lógica en el cliente)
-const MORSE_TABLE: Record<string, string> = {
-  A: '.-', B: '-...', C: '-.-.', D: '-..', E: '.', F: '..-.', G: '--.',
-  H: '....', I: '..', J: '.---', K: '-.-', L: '.-..', M: '--', N: '-.',
-  O: '---', P: '.--.', Q: '--.-', R: '.-.', S: '...', T: '-', U: '..-',
-  V: '...-', W: '.--', X: '-..-', Y: '-.--', Z: '--..'
+// Diccionario de Código Morse
+const MORSE_CODE: Record<string, string> = {
+  'A': '.-', 'B': '-...', 'C': '-.-.', 'D': '-..', 'E': '.', 'F': '..-.',
+  'G': '--.', 'H': '....', 'I': '..', 'J': '.---', 'K': '-.-', 'L': '.-..',
+  'M': '--', 'N': '-.', 'O': '---', 'P': '.--.', 'Q': '--.-', 'R': '.-.',
+  'S': '...', 'T': '-', 'U': '..-', 'V': '...-', 'W': '.--', 'X': '-..-',
+  'Y': '-.--', 'Z': '--..', '0': '-----', '1': '.----', '2': '..---',
+  '3': '...--', '4': '....-', '5': '.....', '6': '-....', '7': '--...',
+  '8': '---..', '9': '----.'
 };
 
 export default function HapticoPage() {
-  const [text, setText] = useState('');
-  const [isPlaying, setIsPlaying] = useState(false);
+  const router = useRouter();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [texto, setTexto] = useState('');
+  const [isVibrating, setIsVibrating] = useState(false);
+  const [mensaje, setMensaje] = useState('');
 
-  // Motor de conversión Texto -> Patrón Háptico (Código Morse)
-  const textToHapticPattern = (textStr: string) => {
-    const unitMs = 200; // Duración de 1 punto en milisegundos
-    const DOT = 1;
-    const DASH = 3;
-    const SYMBOL_GAP = 1;
-    const LETTER_GAP = 3;
-    const WORD_GAP = 7;
-
-    const pattern: number[] = [];
-    const words = textStr.trim().toUpperCase().split(/\s+/);
-
-    words.forEach((word, wordIndex) => {
-      const letters = word.split('');
-      letters.forEach((char, letterIndex) => {
-        const morseStr = MORSE_TABLE[char];
-        if (!morseStr) return;
-
-        const symbols = morseStr.split('');
-        symbols.forEach((symbol, symbolIndex) => {
-          const durationUnits = symbol === '.' ? DOT : DASH;
-          pattern.push(durationUnits * unitMs); // VIBRAR
-
-          if (symbolIndex < symbols.length - 1) {
-            pattern.push(SYMBOL_GAP * unitMs); // PAUSAR intra-letra
-          }
-        });
-
-        if (letterIndex < letters.length - 1) {
-          pattern.push(LETTER_GAP * unitMs); // PAUSAR entre letras
-        }
-      });
-
-      if (wordIndex < words.length - 1) {
-        pattern.push(WORD_GAP * unitMs); // PAUSAR entre palabras
-      }
-    });
-
-    return pattern;
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    router.push('/login');
   };
 
-  const playHaptics = () => {
+  // Función para probar si el dispositivo soporta vibración
+  const testVibration = () => {
     if (!('vibrate' in navigator)) {
-      alert('Tu navegador/dispositivo no soporta la API de vibración (navigator.vibrate). Prueba en un celular Android.');
+      setMensaje('Tu navegador o dispositivo no soporta la vibración web (navigator.vibrate).');
+      return;
+    }
+    // Vibra SOS (... --- ...) para probar
+    navigator.vibrate([100, 100, 100, 100, 100, 300, 300, 100, 300, 100, 300, 300, 100, 100, 100, 100, 100]);
+    setMensaje('¡Prueba SOS enviada al motor vibrador!');
+  };
+
+  // Función principal: Texto a Morse Háptico
+  const playHaptic = () => {
+    if (!('vibrate' in navigator)) {
+      setMensaje('Dispositivo incompatible con vibración.');
       return;
     }
 
-    if (!text) return;
-    
-    setIsPlaying(true);
-    const pattern = textToHapticPattern(text);
-    
-    // Disparar motor de vibración nativo
+    if (!texto.trim()) {
+      setMensaje('Por favor, ingresa un texto.');
+      return;
+    }
+
+    setIsVibrating(true);
+    setMensaje('Traduciendo y vibrando...');
+
+    const pattern: number[] = [];
+    const DOT = 150;      // ms de vibración corta
+    const DASH = 400;     // ms de vibración larga
+    const PAUSE_SYMBOL = 150; // ms de pausa entre puntos/rayas
+    const PAUSE_LETTER = 400; // ms de pausa entre letras
+    const PAUSE_WORD = 800;   // ms de pausa entre palabras
+
+    const cleanText = texto.toUpperCase();
+
+    for (let i = 0; i < cleanText.length; i++) {
+      const char = cleanText[i];
+
+      if (char === ' ') {
+        pattern.push(0); // 0 vibración
+        pattern.push(PAUSE_WORD);
+        continue;
+      }
+
+      const morseChar = MORSE_CODE[char];
+      if (morseChar) {
+        for (let j = 0; j < morseChar.length; j++) {
+          const symbol = morseChar[j];
+          pattern.push(symbol === '.' ? DOT : DASH); // Vibra
+          pattern.push(PAUSE_SYMBOL);                // Pausa
+        }
+        pattern.push(0);
+        pattern.push(PAUSE_LETTER);
+      }
+    }
+
+    // Ejecuta el patrón completo en el hardware del celular
     navigator.vibrate(pattern);
-    
-    // Calcular tiempo total para apagar el estado visual
-    const totalTimeMs = pattern.reduce((sum, current) => sum + current, 0);
-    setTimeout(() => setIsPlaying(false), totalTimeMs);
+
+    // Calculamos más o menos cuándo termina para resetear el botón
+    const totalTime = pattern.reduce((a, b) => a + b, 0);
+    setTimeout(() => {
+      setIsVibrating(false);
+      setMensaje('Vibración completada.');
+    }, totalTime);
   };
 
-  const stopHaptics = () => {
+  const stopHaptic = () => {
     if ('vibrate' in navigator) {
-      navigator.vibrate(0); // Detiene la vibración
+      navigator.vibrate(0); // Un array vacío o 0 detiene cualquier vibración activa
     }
-    setIsPlaying(false);
+    setIsVibrating(false);
+    setMensaje('Vibración detenida por el usuario.');
   };
 
   return (
-    <div className="min-h-screen bg-slate-900 text-white flex flex-col items-center justify-center p-4">
-      <div className="w-full max-w-md">
-        <Link href="/dashboard" className="inline-flex items-center text-teal-400 hover:text-teal-300 mb-8 font-medium">
-          <ArrowLeft className="w-4 h-4 mr-2" /> Volver al Dashboard
-        </Link>
-        
-        <div className="bg-slate-800 rounded-3xl p-8 border border-slate-700 shadow-2xl">
-          <div className="flex items-center justify-center w-16 h-16 bg-teal-500/20 rounded-2xl mb-6 mx-auto">
-            <HandMetal className="w-8 h-8 text-teal-400" />
-          </div>
-          
-          <h1 className="text-2xl font-bold text-center mb-2">Simulador Háptico</h1>
-          <p className="text-slate-400 text-center text-sm mb-8">
-            Convierte texto plano a código Morse usando el motor de vibración de tu dispositivo (coste $0).
-          </p>
-
-          <textarea
-            value={text}
-            onChange={(e) => setText(e.target.value)}
-            placeholder="Escribe una palabra (ej. HOLA)"
-            className="w-full h-32 bg-slate-900 border border-slate-700 rounded-xl p-4 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-teal-500 mb-6 resize-none"
-          />
-
-          <div className="grid grid-cols-2 gap-4">
-            <button
-              onClick={playHaptics}
-              disabled={isPlaying || !text}
-              className={`flex items-center justify-center gap-2 py-3 rounded-xl font-bold transition-all
-                ${isPlaying || !text ? 'bg-slate-700 text-slate-500 cursor-not-allowed' : 'bg-teal-500 hover:bg-teal-400 text-slate-900'}`}
-            >
-              <Play className="w-5 h-5" /> Vibrar
-            </button>
-            <button
-              onClick={stopHaptics}
-              disabled={!isPlaying}
-              className={`flex items-center justify-center gap-2 py-3 rounded-xl font-bold transition-all
-                ${!isPlaying ? 'bg-slate-700 text-slate-500 cursor-not-allowed' : 'bg-rose-500 hover:bg-rose-400 text-white'}`}
-            >
-              <Square className="w-5 h-5" /> Detener
-            </button>
-          </div>
+    <div className="min-h-screen bg-slate-50 flex flex-col md:flex-row">
+      {/* Barra superior móvil */}
+      <div className="md:hidden bg-indigo-900 text-white p-4 flex justify-between items-center shadow-md z-20">
+        <div>
+          <h2 className="text-xl font-bold tracking-tight">Signocronía</h2>
+          <p className="text-indigo-300 text-xs">Módulo Háptico</p>
         </div>
+        <button 
+          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} 
+          className="p-2 bg-indigo-800 rounded-lg hover:bg-indigo-700 transition-colors"
+        >
+          {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+        </button>
       </div>
+
+      {/* Menú Lateral (Igual que en el Dashboard) */}
+      <aside className={`${isMobileMenuOpen ? 'flex' : 'hidden'} md:flex w-full md:w-64 bg-indigo-900 text-white flex-col md:min-h-screen shrink-0 z-10`}>
+        <div className="p-6 hidden md:block">
+          <h2 className="text-xl font-bold tracking-tight">Signocronía</h2>
+          <p className="text-indigo-300 text-xs mt-1">Panel Institucional</p>
+        </div>
+        <nav className="flex-1 px-4 py-6 md:py-0 space-y-2">
+          <a href="/dashboard" className="flex items-center gap-3 hover:bg-indigo-800/50 text-indigo-100 px-4 py-3 rounded-lg transition-colors">
+            <BookOpen className="w-5 h-5 text-teal-400" />
+            <span className="font-medium">Mis Cursos</span>
+          </a>
+          <a href="#" className="flex items-center gap-3 bg-indigo-800 text-white px-4 py-3 rounded-lg transition-colors">
+            <Settings className="w-5 h-5" />
+            <span>Módulo Háptico</span>
+          </a>
+        </nav>
+        <div className="p-4 border-t border-indigo-800 mt-auto">
+          <button onClick={handleSignOut} className="flex items-center gap-3 text-indigo-200 hover:text-white transition-colors w-full px-4 py-2">
+            <LogOut className="w-5 h-5" />
+            <span>Cerrar Sesión</span>
+          </button>
+        </div>
+      </aside>
+
+      {/* Contenido Principal */}
+      <main className="flex-1 p-4 md:p-8 w-full max-w-full overflow-x-hidden">
+        <header className="mb-6 md:mb-8 mt-2 md:mt-0">
+          <h1 className="text-2xl font-bold text-slate-800">Traductor Háptico (Morse)</h1>
+          <p className="text-slate-500 mt-1">Convierte texto a patrones de vibración física.</p>
+        </header>
+
+        <div className="bg-white rounded-2xl p-6 md:p-8 border border-slate-200 shadow-sm max-w-2xl">
+          
+          <div className="bg-blue-50 border border-blue-100 p-4 rounded-xl flex gap-3 mb-6">
+            <AlertTriangle className="w-6 h-6 text-blue-600 shrink-0" />
+            <p className="text-sm text-blue-800">
+              <strong>Aviso:</strong> La vibración solo funciona en dispositivos móviles (Android). Asegúrate de no tener el celular en modo "No Molestar" absoluto.
+            </p>
+          </div>
+
+          <label className="block text-sm font-bold text-slate-700 mb-2">
+            Texto a traducir:
+          </label>
+          <textarea 
+            rows={4}
+            value={texto}
+            onChange={(e) => setTexto(e.target.value)}
+            placeholder="Escribe una palabra corta aquí (ej. HOLA)"
+            className="w-full p-4 border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none mb-6 resize-none"
+          ></textarea>
+
+          <div className="flex flex-col sm:flex-row gap-4 mb-6">
+            {!isVibrating ? (
+              <button 
+                onClick={playHaptic}
+                className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white py-3 px-6 rounded-xl font-bold flex items-center justify-center gap-2 transition-all shadow-md shadow-indigo-200"
+              >
+                <Play className="w-5 h-5" /> Iniciar Vibración
+              </button>
+            ) : (
+              <button 
+                onClick={stopHaptic}
+                className="flex-1 bg-rose-600 hover:bg-rose-700 text-white py-3 px-6 rounded-xl font-bold flex items-center justify-center gap-2 transition-all shadow-md shadow-rose-200 animate-pulse"
+              >
+                <Square className="w-5 h-5" /> Detener
+              </button>
+            )}
+
+            <button 
+              onClick={testVibration}
+              className="sm:w-auto bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 py-3 px-6 rounded-xl font-medium transition-all"
+            >
+              Prueba SOS
+            </button>
+          </div>
+
+          {mensaje && (
+            <div className="text-center p-3 rounded-lg bg-slate-50 text-slate-600 font-medium text-sm border border-slate-100">
+              {mensaje}
+            </div>
+          )}
+        </div>
+      </main>
     </div>
   );
 }
