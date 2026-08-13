@@ -9,8 +9,7 @@ import { supabase } from '@/lib/supabase';
 import * as THREE from 'three';
 
 // ---------------------------------------------------------
-// 1. EL AVATAR HOLOGRAMA (El que estamos usando ahora)
-// Lo regresé al centro (x=0) para que no se escape del celular
+// 1. EL AVATAR HOLOGRAMA (Desactivado)
 // ---------------------------------------------------------
 function AvatarRobot({ isTranslating }: { isTranslating: boolean }) {
   const rightHandRef = useRef<THREE.Mesh>(null);
@@ -61,12 +60,9 @@ function AvatarRobot({ isTranslating }: { isTranslating: boolean }) {
 }
 
 // ---------------------------------------------------------
-// 2. EL AVATAR HUMANO (Preparado para tu archivo .glb)
-// Cuando descargues tu personaje, solo cambia <AvatarRobot /> 
-// por <AvatarHumano /> en el Canvas de abajo.
+// 2. EL AVATAR HUMANO (Activado)
 // ---------------------------------------------------------
 function AvatarHumano({ isTranslating }: { isTranslating: boolean }) {
-  // Esto buscará un archivo llamado "avatar.glb" en tu carpeta "public"
   const { scene } = useGLTF('/avatar.glb'); 
   const avatarRef = useRef<THREE.Group>(null);
 
@@ -77,7 +73,7 @@ function AvatarHumano({ isTranslating }: { isTranslating: boolean }) {
       avatarRef.current.position.y = -1.5 + Math.sin(t * 2) * 0.05;
       
       if (isTranslating) {
-        // Aquí iría la lógica para mover los huesos (bones) del modelo real
+        // Rotación de simulación mientras "traduce"
         avatarRef.current.rotation.y = Math.sin(t * 8) * 0.1;
       } else {
         avatarRef.current.rotation.y = 0;
@@ -87,7 +83,6 @@ function AvatarHumano({ isTranslating }: { isTranslating: boolean }) {
 
   return <primitive ref={avatarRef} object={scene} scale={1.5} position={[0, -1.5, 0]} />;
 }
-
 
 export default function AvatarPage() {
   const router = useRouter();
@@ -153,9 +148,9 @@ export default function AvatarPage() {
             <Environment preset="city" />
             
             <Suspense fallback={null}>
-              {/* Para usar el modelo humano real, comenta la línea de abajo y descomenta la de AvatarHumano */}
-              <AvatarRobot isTranslating={isTranslating} />
-              {/* <AvatarHumano isTranslating={isTranslating} /> */}
+              {/* ¡AQUÍ ESTÁ EL CAMBIO APLICADO! */}
+              {/* <AvatarRobot isTranslating={isTranslating} /> */}
+              <AvatarHumano isTranslating={isTranslating} />
             </Suspense>
 
             <ContactShadows position={[0, -1.2, 0]} opacity={0.6} scale={10} blur={2} far={4} />
@@ -163,7 +158,6 @@ export default function AvatarPage() {
           </Canvas>
         </div>
         
-        {/* Panel reubicado: Abajo en móvil, arriba a la derecha en PC */}
         <div className="absolute bottom-0 left-0 right-0 p-4 md:p-0 md:top-6 md:right-6 md:left-auto md:bottom-auto md:w-96 z-10 pointer-events-auto">
              <div className="bg-slate-800/90 backdrop-blur-md p-5 md:p-6 rounded-2xl border border-slate-700 shadow-2xl mb-4 md:mb-0">
                 <h1 className="text-xl font-bold text-white mb-2">Traductor Visual 3D</h1>
