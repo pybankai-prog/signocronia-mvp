@@ -3,7 +3,8 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
-import { BookOpen, UploadCloud, Users, Settings, LogOut, Loader2, FileText, BrainCircuit, Volume2, Square, Menu, X } from 'lucide-react';
+// <-- NUEVO: Agregamos el ícono Eye a las importaciones
+import { BookOpen, UploadCloud, Users, Settings, LogOut, Loader2, FileText, BrainCircuit, Volume2, Square, Menu, X, Eye } from 'lucide-react';
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -14,7 +15,6 @@ export default function DashboardPage() {
   const [aiResponse, setAiResponse] = useState('');
   
   const [isSpeaking, setIsSpeaking] = useState(false);
-  // <-- NUEVO: Estado para abrir/cerrar el menú en celulares
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {
@@ -145,10 +145,9 @@ export default function DashboardPage() {
   };
 
   return (
-    // <-- MODIFICADO: Agregamos flex-col para móviles y flex-row para escritorio
     <div className="min-h-screen bg-slate-50 flex flex-col md:flex-row">
       
-      {/* <-- NUEVO: Barra superior SOLO para celulares */}
+      {/* Barra superior móvil */}
       <div className="md:hidden bg-indigo-900 text-white p-4 flex justify-between items-center shadow-md z-20">
         <div>
           <h2 className="text-xl font-bold tracking-tight">Signocronía</h2>
@@ -162,7 +161,7 @@ export default function DashboardPage() {
         </button>
       </div>
 
-      {/* <-- MODIFICADO: El menú lateral se oculta en celulares y se muestra al presionar el botón */}
+      {/* Menú Lateral */}
       <aside className={`${isMobileMenuOpen ? 'flex' : 'hidden'} md:flex w-full md:w-64 bg-indigo-900 text-white flex-col md:min-h-screen shrink-0 z-10`}>
         <div className="p-6 hidden md:block">
           <h2 className="text-xl font-bold tracking-tight">Signocronía</h2>
@@ -177,6 +176,11 @@ export default function DashboardPage() {
             <Settings className="w-5 h-5" />
             <span>Módulo Háptico</span>
           </a>
+          {/* <-- NUEVO: Enlace al Avatar 3D */}
+          <a href="/avatar" className="flex items-center gap-3 hover:bg-indigo-800/50 text-indigo-100 px-4 py-3 rounded-lg transition-colors">
+            <Eye className="w-5 h-5 text-emerald-400" />
+            <span>Avatar 3D</span>
+          </a>
         </nav>
         <div className="p-4 border-t border-indigo-800 mt-auto">
           <button onClick={handleSignOut} className="flex items-center gap-3 text-indigo-200 hover:text-white transition-colors w-full px-4 py-2">
@@ -186,7 +190,7 @@ export default function DashboardPage() {
         </div>
       </aside>
 
-      {/* <-- MODIFICADO: Ajustamos márgenes y ancho para evitar desbordes en móvil */}
+      {/* Contenido Principal */}
       <main className="flex-1 p-4 md:p-8 w-full max-w-full overflow-x-hidden">
         <header className="flex justify-between items-center mb-6 md:mb-8 mt-2 md:mt-0">
           <h1 className="text-2xl font-bold text-slate-800">Resumen de Actividad</h1>
@@ -200,7 +204,6 @@ export default function DashboardPage() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8 mb-6 md:mb-8">
-          {/* Tarjeta Subida */}
           <div className="bg-white border border-slate-200 border-dashed rounded-2xl p-6 md:p-8 text-center flex flex-col items-center justify-center relative">
             <div className="w-16 h-16 bg-teal-50 text-teal-600 rounded-full flex items-center justify-center mb-4">
               {isUploading ? <Loader2 className="w-8 h-8 animate-spin" /> : <UploadCloud className="w-8 h-8" />}
@@ -215,7 +218,6 @@ export default function DashboardPage() {
             {uploadMessage && <div className="mt-4 p-2 text-sm text-emerald-700 font-medium">{uploadMessage}</div>}
           </div>
 
-          {/* Tarjeta IA */}
           <div className="bg-white rounded-2xl p-6 md:p-8 border border-slate-200 shadow-sm flex flex-col">
             <div className="flex items-center gap-3 mb-4 border-b border-slate-100 pb-4">
               <div className="w-10 h-10 bg-indigo-50 text-indigo-700 rounded-xl flex items-center justify-center shrink-0">
@@ -255,7 +257,6 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Lista de Documentos */}
         <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
           <div className="px-4 md:px-6 py-4 border-b border-slate-200">
             <h3 className="font-bold text-slate-800">Archivos en la Nube</h3>

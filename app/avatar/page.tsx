@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { OrbitControls, Environment, ContactShadows } from '@react-three/drei';
@@ -14,12 +14,10 @@ function AvatarRobot({ isTranslating }: { isTranslating: boolean }) {
   const leftHandRef = useRef<THREE.Mesh>(null);
   const headRef = useRef<THREE.Mesh>(null);
 
-  // Bucle de animación (se ejecuta 60 veces por segundo)
   useFrame((state) => {
     const t = state.clock.getElapsedTime();
     
     if (isTranslating) {
-      // Movimientos rápidos simulando Dactilología (Lengua de Señas)
       if (rightHandRef.current && leftHandRef.current && headRef.current) {
         rightHandRef.current.position.y = Math.sin(t * 15) * 0.4 + 0.5;
         rightHandRef.current.position.x = 1.2 + Math.cos(t * 10) * 0.3;
@@ -30,7 +28,6 @@ function AvatarRobot({ isTranslating }: { isTranslating: boolean }) {
         headRef.current.rotation.y = Math.sin(t * 5) * 0.1;
       }
     } else {
-      // Movimiento de "Respiración" (Inactivo)
       if (rightHandRef.current && leftHandRef.current && headRef.current) {
         rightHandRef.current.position.y = Math.sin(t * 2) * 0.1;
         rightHandRef.current.position.x = 1.5;
@@ -44,26 +41,23 @@ function AvatarRobot({ isTranslating }: { isTranslating: boolean }) {
   });
 
   return (
-    <group position={[0, -1, 0]}>
-      {/* Cabeza del Avatar */}
+    // <-- AQUÍ ESTÁ EL CAMBIO: x=1.5 para moverlo a la derecha
+    <group position={[1.5, -1, 0]}>
       <mesh ref={headRef} position={[0, 2, 0]}>
         <sphereGeometry args={[0.4, 32, 32]} />
         <meshStandardMaterial color="#4f46e5" metalness={0.5} roughness={0.2} emissive="#4f46e5" emissiveIntensity={0.2} />
       </mesh>
       
-      {/* Torso */}
       <mesh position={[0, 0.8, 0]}>
         <cylinderGeometry args={[0.3, 0.4, 1.5]} />
         <meshStandardMaterial color="#cbd5e1" metalness={0.8} roughness={0.2} />
       </mesh>
 
-      {/* Mano Derecha */}
       <mesh ref={rightHandRef} position={[1.5, 0, 0]}>
         <boxGeometry args={[0.2, 0.4, 0.1]} />
         <meshStandardMaterial color="#14b8a6" emissive="#14b8a6" emissiveIntensity={0.5} />
       </mesh>
 
-      {/* Mano Izquierda */}
       <mesh ref={leftHandRef} position={[-1.5, 0, 0]}>
         <boxGeometry args={[0.2, 0.4, 0.1]} />
         <meshStandardMaterial color="#14b8a6" emissive="#14b8a6" emissiveIntensity={0.5} />
@@ -86,9 +80,7 @@ export default function AvatarPage() {
   const simulateTranslation = () => {
     if (!texto.trim()) return;
     setIsTranslating(true);
-    
-    // Calculamos un tiempo de animación basado en el largo del texto
-    const timeToTranslate = texto.length * 300; // 300ms por letra
+    const timeToTranslate = texto.length * 300; 
     
     setTimeout(() => {
       setIsTranslating(false);
@@ -97,7 +89,6 @@ export default function AvatarPage() {
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col md:flex-row">
-      {/* Barra superior móvil */}
       <div className="md:hidden bg-indigo-900 text-white p-4 flex justify-between items-center shadow-md z-20">
         <div>
           <h2 className="text-xl font-bold tracking-tight">Signocronía</h2>
@@ -108,7 +99,6 @@ export default function AvatarPage() {
         </button>
       </div>
 
-      {/* Menú Lateral */}
       <aside className={`${isMobileMenuOpen ? 'flex' : 'hidden'} md:flex w-full md:w-64 bg-indigo-900 text-white flex-col md:min-h-screen shrink-0 z-10`}>
         <div className="p-6 hidden md:block">
           <h2 className="text-xl font-bold tracking-tight">Signocronía</h2>
@@ -136,21 +126,19 @@ export default function AvatarPage() {
         </div>
       </aside>
 
-      {/* Contenido Principal */}
       <main className="flex-1 flex flex-col h-screen overflow-hidden bg-slate-900">
-        
-        {/* Lienzo 3D (WebGL) */}
         <div className="flex-1 relative cursor-move">
-          <Canvas camera={{ position: [0, 1.5, 5], fov: 45 }}>
+          <Canvas camera={{ position: [0, 1.5, 6], fov: 45 }}>
             <ambientLight intensity={0.5} />
             <spotLight position={[10, 10, 10]} angle={0.15} penumbra={1} intensity={1} castShadow />
             <Environment preset="city" />
             <AvatarRobot isTranslating={isTranslating} />
-            <ContactShadows position={[0, -1, 0]} opacity={0.5} scale={10} blur={2} far={4} />
+            {/* <-- CAMBIO: La sombra también se mueve a x=1.5 */}
+            <ContactShadows position={[1.5, -1, 0]} opacity={0.5} scale={10} blur={2} far={4} />
             <OrbitControls enableZoom={false} maxPolarAngle={Math.PI / 2} minPolarAngle={Math.PI / 3} />
           </Canvas>
           
-          <div className="absolute top-6 left-6 right-6 md:right-auto md:w-96">
+          <div className="absolute top-6 left-6 right-6 md:right-auto md:w-96 pointer-events-auto">
              <div className="bg-slate-800/80 backdrop-blur-md p-6 rounded-2xl border border-slate-700 shadow-2xl">
                 <h1 className="text-xl font-bold text-white mb-2">Traductor Visual 3D</h1>
                 <p className="text-slate-400 text-sm mb-4">Escribe un texto y el motor WebGL simulará la dactilología espacial.</p>
