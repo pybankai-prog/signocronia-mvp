@@ -1,83 +1,78 @@
 'use client';
 
-import React, { useState, useRef, Suspense } from 'react';
+import React, { useState, useRef, Suspense, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { OrbitControls, Environment, ContactShadows, useGLTF } from '@react-three/drei';
-import { BookOpen, Settings, LogOut, Menu, X, Play, Square, Eye } from 'lucide-react';
+import { BookOpen, Settings, LogOut, Menu, X, Play, Square, Eye, Hand } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import * as THREE from 'three';
 
 // ---------------------------------------------------------
-// 1. EL AVATAR HOLOGRAMA (Desactivado)
+// EL AVATAR HUMANO (Con Animación Procedural y Seña "Hola")
 // ---------------------------------------------------------
-function AvatarRobot({ isTranslating }: { isTranslating: boolean }) {
-  const rightHandRef = useRef<THREE.Mesh>(null);
-  const leftHandRef = useRef<THREE.Mesh>(null);
-  const headRef = useRef<THREE.Mesh>(null);
-
-  useFrame((state) => {
-    const t = state.clock.getElapsedTime();
-    if (isTranslating) {
-      if (rightHandRef.current && leftHandRef.current && headRef.current) {
-        rightHandRef.current.position.y = Math.sin(t * 15) * 0.4 + 0.5;
-        rightHandRef.current.position.x = 0.8 + Math.cos(t * 10) * 0.3;
-        leftHandRef.current.position.y = Math.cos(t * 12) * 0.4 + 0.5;
-        leftHandRef.current.position.x = -0.8 + Math.sin(t * 14) * 0.3;
-        headRef.current.rotation.y = Math.sin(t * 5) * 0.1;
-      }
-    } else {
-      if (rightHandRef.current && leftHandRef.current && headRef.current) {
-        rightHandRef.current.position.y = Math.sin(t * 2) * 0.1;
-        rightHandRef.current.position.x = 0.8;
-        leftHandRef.current.position.y = Math.sin(t * 2 + 1) * 0.1;
-        leftHandRef.current.position.x = -0.8;
-        headRef.current.rotation.y = Math.sin(t * 0.5) * 0.05;
-      }
-    }
-  });
-
-  return (
-    <group position={[0, -1.2, 0]}>
-      <mesh ref={headRef} position={[0, 2, 0]}>
-        <sphereGeometry args={[0.4, 32, 32]} />
-        <meshStandardMaterial color="#4f46e5" metalness={0.5} roughness={0.2} emissive="#4f46e5" emissiveIntensity={0.2} />
-      </mesh>
-      <mesh position={[0, 0.8, 0]}>
-        <cylinderGeometry args={[0.3, 0.4, 1.5]} />
-        <meshStandardMaterial color="#cbd5e1" metalness={0.8} roughness={0.2} />
-      </mesh>
-      <mesh ref={rightHandRef} position={[0.8, 0, 0]}>
-        <boxGeometry args={[0.2, 0.4, 0.1]} />
-        <meshStandardMaterial color="#14b8a6" emissive="#14b8a6" emissiveIntensity={0.5} />
-      </mesh>
-      <mesh ref={leftHandRef} position={[-0.8, 0, 0]}>
-        <boxGeometry args={[0.2, 0.4, 0.1]} />
-        <meshStandardMaterial color="#14b8a6" emissive="#14b8a6" emissiveIntensity={0.5} />
-      </mesh>
-    </group>
-  );
-}
-
-// ---------------------------------------------------------
-// 2. EL AVATAR HUMANO (Activado)
-// ---------------------------------------------------------
-function AvatarHumano({ isTranslating }: { isTranslating: boolean }) {
+function AvatarHumano({ modoAnimacion }: { modoAnimacion: 'reposo' | 'traduciendo' | 'hola' }) {
   const { scene } = useGLTF('/avatar.glb'); 
   const avatarRef = useRef<THREE.Group>(null);
+  
+  // Referencias a los huesos del avatar
+  const rightArm = useRef<THREE.Object3D | null>(null);
+  const leftArm = useRef<THREE.Object3D | null>(null);
+  const rightForeArm = useRef<THREE.Object3D | null>(null);
+  const leftForeArm = useRef<THREE.Object3D | null>(null);
+
+  useEffect(() => {
+    scene.traverse((child) => {
+      if ((child as THREE.Bone).isBone) {
+        const name = child.name.toLowerCase();
+        if (name.includes('rightarm') || name.includes('right_arm')) rightArm.current = child;
+        if (name.includes('leftarm') || name.includes('left_arm')) leftArm.current = child;
+        if (name.includes('rightforearm') || name.includes('right_forearm')) rightForeArm.current = child;
+        if (name.includes('leftforearm') || name.includes('left_forearm')) leftForeArm.current = child;
+      }
+    });
+
+    // Romper la Pose T al inicio
+    if (rightArm.current) rightArm.current.rotation.z = -1.2;
+    if (leftArm.current) leftArm.current.rotation.z = 1.2;
+  }, [scene]);
 
   useFrame((state) => {
     const t = state.clock.getElapsedTime();
+    
     if (avatarRef.current) {
-      // Pequeña animación de respiración base
-      avatarRef.current.position.y = -1.5 + Math.sin(t * 2) * 0.05;
-      
-      if (isTranslating) {
-        // Rotación de simulación mientras "traduce"
-        avatarRef.current.rotation.y = Math.sin(t * 8) * 0.1;
-      } else {
-        avatarRef.current.rotation.y = 0;
+      avatarRef.current.position.y = -1.5 + Math.sin(t * 2) * 0.02; // Respiración
+    }
+
+    if (modoAnimacion === 'hola') {
+      // SEÑA REAL: "Hola" (Saludo)
+      // Levanta el brazo derecho y dobla el codo
+      if (rightArm.current) {
+        rightArm.current.rotation.z = -0.2; // Levanta el brazo a nivel del hombro
+        rightArm.current.rotation.y = Math.sin(t * 8) * 0.4; // Movimiento de saludo (saluda con la mano)
       }
+      if (rightForeArm.current) {
+        rightForeArm.current.rotation.x = -1.0; // Dobla el codo hacia arriba
+      }
+      // Brazo izquierdo se queda abajo
+      if (leftArm.current) leftArm.current.rotation.z = 1.2;
+      if (leftForeArm.current) leftForeArm.current.rotation.x = -0.1;
+      
+    } else if (modoAnimacion === 'traduciendo') {
+      // SEÑA PROCEDURAL: Simulación rápida
+      if (rightArm.current) rightArm.current.rotation.z = -0.5 + Math.sin(t * 10) * 0.2;
+      if (rightForeArm.current) rightForeArm.current.rotation.x = -1.2 + Math.cos(t * 15) * 0.5;
+      
+      if (leftArm.current) leftArm.current.rotation.z = 0.5 + Math.sin(t * 12) * 0.2;
+      if (leftForeArm.current) leftForeArm.current.rotation.x = -1.0 + Math.cos(t * 14) * 0.4;
+      
+    } else {
+      // REPOSO: Brazos abajo relajados
+      if (rightArm.current) rightArm.current.rotation.z = -1.2 + Math.sin(t) * 0.05;
+      if (rightForeArm.current) rightForeArm.current.rotation.x = -0.1;
+      
+      if (leftArm.current) leftArm.current.rotation.z = 1.2 + Math.sin(t) * 0.05;
+      if (leftForeArm.current) leftForeArm.current.rotation.x = -0.1;
     }
   });
 
@@ -88,7 +83,9 @@ export default function AvatarPage() {
   const router = useRouter();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [texto, setTexto] = useState('');
-  const [isTranslating, setIsTranslating] = useState(false);
+  
+  // Estado que controla qué hace el avatar
+  const [modoAnimacion, setModoAnimacion] = useState<'reposo' | 'traduciendo' | 'hola'>('reposo');
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
@@ -97,8 +94,15 @@ export default function AvatarPage() {
 
   const simulateTranslation = () => {
     if (!texto.trim()) return;
-    setIsTranslating(true);
-    setTimeout(() => setIsTranslating(false), texto.length * 300);
+    setModoAnimacion('traduciendo');
+    setTimeout(() => setModoAnimacion('reposo'), texto.length * 300);
+  };
+
+  // Función exclusiva para el saludo "Hola"
+  const decirHola = () => {
+    setModoAnimacion('hola');
+    // Saluda durante 3 segundos y luego vuelve a reposo
+    setTimeout(() => setModoAnimacion('reposo'), 3000);
   };
 
   return (
@@ -148,9 +152,7 @@ export default function AvatarPage() {
             <Environment preset="city" />
             
             <Suspense fallback={null}>
-              {/* ¡AQUÍ ESTÁ EL CAMBIO APLICADO! */}
-              {/* <AvatarRobot isTranslating={isTranslating} /> */}
-              <AvatarHumano isTranslating={isTranslating} />
+              <AvatarHumano modoAnimacion={modoAnimacion} />
             </Suspense>
 
             <ContactShadows position={[0, -1.2, 0]} opacity={0.6} scale={10} blur={2} far={4} />
@@ -171,17 +173,32 @@ export default function AvatarPage() {
                   className="w-full p-3 bg-slate-900/50 border border-slate-600 rounded-xl text-white outline-none focus:border-emerald-500 mb-4 resize-none placeholder:text-slate-500"
                 ></textarea>
 
-                <button 
-                  onClick={simulateTranslation}
-                  disabled={isTranslating}
-                  className={`w-full py-3 rounded-xl font-bold flex items-center justify-center gap-2 transition-all ${
-                    isTranslating 
-                    ? 'bg-slate-700 text-slate-400 cursor-not-allowed' 
-                    : 'bg-emerald-500 hover:bg-emerald-600 text-slate-900 shadow-lg shadow-emerald-500/20'
-                  }`}
-                >
-                  {isTranslating ? <><Square className="w-5 h-5 animate-spin" /> Procesando...</> : <><Play className="w-5 h-5" /> Traducir</>}
-                </button>
+                {/* Contenedor de Botones (Traducción + Hola) */}
+                <div className="flex gap-3">
+                  <button 
+                    onClick={simulateTranslation}
+                    disabled={modoAnimacion !== 'reposo'}
+                    className={`flex-1 py-3 rounded-xl font-bold flex items-center justify-center gap-2 transition-all ${
+                      modoAnimacion !== 'reposo' 
+                      ? 'bg-slate-700 text-slate-400 cursor-not-allowed' 
+                      : 'bg-emerald-500 hover:bg-emerald-600 text-slate-900 shadow-lg shadow-emerald-500/20'
+                    }`}
+                  >
+                    {modoAnimacion === 'traduciendo' ? <><Square className="w-5 h-5 animate-spin" /> Procesando...</> : <><Play className="w-5 h-5" /> Traducir</>}
+                  </button>
+
+                  <button 
+                    onClick={decirHola}
+                    disabled={modoAnimacion !== 'reposo'}
+                    className={`py-3 px-4 rounded-xl font-bold flex items-center justify-center transition-all ${
+                      modoAnimacion !== 'reposo' 
+                      ? 'bg-slate-700 text-slate-400 cursor-not-allowed' 
+                      : 'bg-indigo-500 hover:bg-indigo-600 text-white shadow-lg shadow-indigo-500/20'
+                    }`}
+                  >
+                    <Hand className="w-5 h-5 mr-1" /> Hola
+                  </button>
+                </div>
              </div>
         </div>
       </main>
