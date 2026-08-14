@@ -4,7 +4,7 @@ export async function POST(req: Request) {
   try {
     const { texto, historial } = await req.json();
     
-    // Leemos la llave segura (funciona con o sin NEXT_PUBLIC_)
+    // Leemos la llave segura
     const apiKey = process.env.GROQ_API_KEY || process.env.NEXT_PUBLIC_GROQ_API_KEY;
 
     if (!apiKey) {
@@ -22,7 +22,7 @@ export async function POST(req: Request) {
       content: m.texto
     }));
 
-    // Conexión segura de Servidor a Servidor (Esto evita el bloqueo de seguridad CORS)
+    // Conexión segura de Servidor a Servidor
     const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -30,7 +30,7 @@ export async function POST(req: Request) {
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        model: "llama3-8b-8192",
+        model: "llama-3.1-8b-instant", // <--- ¡AQUÍ ESTÁ EL CEREBRO ACTUALIZADO!
         messages: [instruccionSistema, ...historialParaGroq, { role: "user", content: texto }],
         temperature: 0.7,
         max_tokens: 150
