@@ -40,19 +40,9 @@ export default function LandingPage() {
 
         {isMobileMenuOpen && (
           <div className="md:hidden bg-white border-b border-slate-200 px-4 pt-2 pb-6 shadow-xl absolute w-full left-0">
-            <a 
-              href="#caracteristicas" 
-              onClick={() => setIsMobileMenuOpen(false)}
-              className="block text-slate-600 font-medium py-3 border-b border-slate-100"
-            >
-              Características
-            </a>
-            <Link href="/login" className="block text-indigo-600 font-bold py-3 mt-2 text-center">
-              Iniciar Sesión
-            </Link>
-            <Link href="/login" className="block bg-indigo-600 text-white text-center px-6 py-3.5 rounded-xl font-bold mt-3 shadow-md">
-              Comenzar Gratis Ahora
-            </Link>
+            <a href="#caracteristicas" onClick={() => setIsMobileMenuOpen(false)} className="block text-slate-600 font-medium py-3 border-b border-slate-100">Características</a>
+            <Link href="/login" className="block text-indigo-600 font-bold py-3 mt-2 text-center">Iniciar Sesión</Link>
+            <Link href="/login" className="block bg-indigo-600 text-white text-center px-6 py-3.5 rounded-xl font-bold mt-3 shadow-md">Comenzar Gratis Ahora</Link>
           </div>
         )}
       </header>
@@ -65,26 +55,31 @@ export default function LandingPage() {
               <span className="flex h-2.5 w-2.5 rounded-full bg-indigo-600 animate-pulse"></span>
               Plataforma DeepTech Inclusiva
             </div>
-            
             <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight text-slate-900 mb-6 leading-tight">
-              Educación Sin Barreras con <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-teal-500">Inteligencia Artificial</span>
+              Educación Sin Barreras con <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-teal-500">IA</span>
             </h1>
-            
             <p className="text-lg md:text-xl text-slate-600 mb-10 leading-relaxed px-2 md:px-0">
-              Transformamos documentos complejos en experiencias accesibles. Resúmenes con IA, síntesis de voz, dactilología en 3D y traducción háptica en una sola plataforma.
+              Transformamos documentos en experiencias accesibles. Resúmenes, voz, dactilología 3D y traducción háptica.
             </p>
             
+            {/* BOTONES SIMPLIFICADOS */}
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 px-2 sm:px-0">
               <Link href="/login" className="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-4 rounded-xl md:rounded-full font-bold text-lg transition-all shadow-xl shadow-indigo-200 flex items-center justify-center gap-2">
                 Ingresar al Dashboard <ArrowRight className="w-5 h-5" />
               </Link>
-              <a href="#tercera-edad" className="w-full sm:w-auto bg-white hover:bg-slate-50 text-slate-700 border-2 border-slate-200 px-8 py-4 rounded-xl md:rounded-full font-bold text-lg transition-all flex items-center justify-center">
-                Módulo Adultos Mayores
+              
+              {/* NUEVO BOTÓN DIRECTO A GEMINI */}
+              <a 
+                href="https://gemini.google.com" 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="w-full sm:w-auto bg-amber-400 hover:bg-amber-500 text-slate-900 border-2 border-amber-400 px-8 py-4 rounded-xl md:rounded-full font-bold text-lg transition-all flex items-center justify-center shadow-lg"
+              >
+                <Mic className="w-5 h-5 mr-2" /> IA para Adultos Mayores
               </a>
             </div>
           </div>
         </div>
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] md:w-[800px] md:h-[800px] bg-gradient-to-tr from-indigo-100 to-teal-50 rounded-full blur-3xl opacity-50 -z-10"></div>
       </section>
 
       {/* ---------------- CARACTERÍSTICAS ---------------- */}
@@ -131,28 +126,22 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ---------------- SECCIÓN TERCERA EDAD ---------------- */}
-      <section id="tercera-edad" className="bg-[#003366] py-24 border-y-8 border-[#002244]">
-        <div className="max-w-5xl mx-auto px-4 text-center">
-          <div className="flex justify-center mb-8">
-            <div className="bg-white/20 p-5 rounded-full">
-              <Volume2 className="w-16 h-16 text-white" />
-            </div>
-          </div>
-          <p className="text-white text-2xl md:text-4xl font-sans font-bold mb-14 leading-normal max-w-4xl mx-auto">
-            Haga clic en el botón amarillo de abajo para hablar con nuestra Inteligencia Artificial. No necesita escribir.
-          </p>
-          <div className="py-6 px-4">
-            <Link 
-              href="/adultos-mayores" 
-              className="inline-flex items-center justify-center gap-4 bg-[#FFD700] hover:bg-[#FFC000] text-black px-8 py-8 md:px-16 md:py-10 rounded-[2.5rem] font-sans font-extrabold text-2xl md:text-5xl transition-transform hover:scale-105 shadow-[0_15px_30px_rgba(0,0,0,0.6)] focus:ring-8 focus:ring-yellow-300 outline-none w-full md:w-auto"
-            >
-              <Mic className="w-10 h-10 md:w-16 md:h-16 text-black shrink-0" />
-              <span className="text-center">IA para adultos mayores</span>
-            </Link>
-          </div>
+      {/* ---------------- BANNER MINIMALISTA (Tercera Edad) ---------------- */}
+      <section className="bg-slate-100 py-12 border-t border-slate-200">
+        <div className="max-w-4xl mx-auto px-4 text-center">
+          <h2 className="text-2xl font-bold text-slate-800 mb-6">¿Busca una experiencia más sencilla?</h2>
+          <a 
+            href="https://gemini.google.com" 
+            target="_blank" 
+            rel="noopener noreferrer" 
+            className="inline-flex items-center justify-center gap-3 bg-amber-400 hover:bg-amber-500 text-slate-900 px-8 py-4 rounded-2xl font-bold text-lg transition-transform hover:scale-105 shadow-md"
+          >
+            <Mic className="w-6 h-6" />
+            Abrir Asistente por Voz (Gemini)
+          </a>
         </div>
       </section>
+
       {/* ---------------- FOOTER ---------------- */}
       <footer className="bg-slate-900 text-slate-400 py-12">
         <div className="max-w-7xl mx-auto px-4 text-center">
