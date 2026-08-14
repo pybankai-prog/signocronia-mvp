@@ -36,10 +36,9 @@ export default function AdultosMayoresPage() {
     setIsCargando(true);
 
     try {
-      // Conexión Directa a Gemini (Front-End) para evitar errores de servidor local
       const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
       if (!apiKey) {
-        throw new Error("Llave no detectada.");
+        throw new Error("Llave no detectada en Vercel o archivo local.");
       }
 
       const genAI = new GoogleGenerativeAI(apiKey);
@@ -69,6 +68,7 @@ export default function AdultosMayoresPage() {
     } finally {
       setIsCargando(false);
     }
+  }; // <--- ESTA ES LA LLAVE QUE FALTABA Y CAUSABA EL ERROR ROJO
 
   const leerEnVozAlta = (texto: string) => {
     if ('speechSynthesis' in window) {
@@ -127,7 +127,6 @@ export default function AdultosMayoresPage() {
         </div>
       </header>
 
-      {/* pb-[280px] asegura que el chat no quede oculto detrás de los botones del celular */}
       <main className="flex-1 p-4 md:p-10 overflow-y-auto space-y-6 max-w-5xl mx-auto w-full pt-28 md:pt-36 pb-[280px] md:pb-48">
         {historial.length === 0 && (
           <div className="text-center mt-10 md:mt-20">
@@ -163,7 +162,6 @@ export default function AdultosMayoresPage() {
         <div ref={chatFinalRef} />
       </main>
 
-      {/* Rediseño de Footer para encajar perfecto en Celulares */}
       <footer className="bg-[#002244] p-4 md:p-8 border-t-4 md:border-t-8 border-yellow-400 fixed bottom-0 left-0 right-0 z-50">
         <div className="max-w-5xl mx-auto flex flex-col md:flex-row gap-3 md:gap-6">
           <button 

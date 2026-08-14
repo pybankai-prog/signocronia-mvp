@@ -61,7 +61,7 @@ export default function LandingPage() {
             </h1>
             
             <p className="text-lg md:text-xl text-slate-600 mb-12 leading-relaxed px-4 md:px-12 font-medium">
-              Diseñada para personas sordas, personas ciegas, personas no verbales y adultos mayores. Transformamos la información a través de IA, síntesis de voz nativa y dactilología holográfica.
+              Diseñada para personas sordas, personas ciegas, personas no verbales y adultos mayores. Transformamos la información a través de Inteligencia Artificial, síntesis de voz nativa y dactilología holográfica.
             </p>
             
             <div className="flex flex-col sm:flex-row items-center justify-center gap-5 px-4 sm:px-0">
@@ -82,7 +82,7 @@ export default function LandingPage() {
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-5xl font-bold mb-6">Diseñado para incluir a todos</h2>
             <p className="text-slate-400 max-w-3xl mx-auto text-lg leading-relaxed">
-              La tecnología pierde su propósito si deja a las minorías atrás. Hemos construido interfaces que responden a las necesidades específicas de cada grupo.
+              La tecnología pierde su propósito si deja a las minorías atrás. Hemos construido interfaces que responden a las necesidades específicas de cada grupo utilizando siempre los términos correctos.
             </p>
           </div>
 
@@ -91,7 +91,7 @@ export default function LandingPage() {
               <Globe className="w-10 h-10 text-teal-400 mb-5" />
               <h3 className="text-xl font-bold mb-3">Personas Sordas y No Verbales</h3>
               <p className="text-slate-400 text-sm leading-relaxed">
-                El motor WebGL 3D proyecta Lengua de Señas (LSP) y dactilología espacial interactiva para facilitar la comunicación bidireccional.
+                El motor WebGL 3D proyecta Lengua de Señas (LSP) y dactilología espacial interactiva para facilitar la comunicación y dignificar la identidad lingüística.
               </p>
             </div>
 
@@ -99,7 +99,7 @@ export default function LandingPage() {
               <Ear className="w-10 h-10 text-rose-400 mb-5" />
               <h3 className="text-xl font-bold mb-3">Personas Ciegas</h3>
               <p className="text-slate-400 text-sm leading-relaxed">
-                Lectura automatizada mediante síntesis de voz nativa y traducción física de hardware a Braille Lineal para quienes presentan sordoceguera.
+                Lectura automatizada mediante síntesis de voz nativa y traducción física de hardware a Braille Lineal para quienes presentan discapacidad visual total o sordoceguera.
               </p>
             </div>
             
@@ -107,7 +107,7 @@ export default function LandingPage() {
               <Users className="w-10 h-10 text-amber-400 mb-5" />
               <h3 className="text-xl font-bold mb-3">Adultos Mayores</h3>
               <p className="text-slate-400 text-sm leading-relaxed">
-                Interfaces de ultra-alto contraste y un asistente conversacional paciente por voz, diseñado para romper la brecha tecnológica.
+                Interfaces de ultra-alto contraste y un asistente conversacional paciente por voz, diseñado para romper la brecha tecnológica sin paternalismos.
               </p>
             </div>
 
@@ -115,7 +115,7 @@ export default function LandingPage() {
               <ShieldCheck className="w-10 h-10 text-indigo-400 mb-5" />
               <h3 className="text-xl font-bold mb-3">Estudiantes</h3>
               <p className="text-slate-400 text-sm leading-relaxed">
-                Procesamiento de Inteligencia Artificial capaz de leer documentos densos y estructurar resúmenes exactos para optimizar el aprendizaje.
+                Procesamiento de Inteligencia Artificial capaz de leer PDFs densos y estructurar resúmenes exactos para optimizar el aprendizaje.
               </p>
             </div>
           </div>
@@ -148,7 +148,7 @@ export default function LandingPage() {
               </div>
               <h3 className="text-xl font-bold text-slate-900 mb-4">Síntesis de Voz Nativa</h3>
               <p className="text-slate-600 leading-relaxed text-sm">
-                Web Speech API para convertir texto a audio, vital para personas con ceguera y adultos mayores.
+                Web Speech API para convertir texto a audio, vital para personas ciegas y adultos mayores.
               </p>
             </div>
 
