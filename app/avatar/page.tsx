@@ -4,7 +4,7 @@ import React, { useState, useRef, Suspense, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { OrbitControls, Environment, ContactShadows, useGLTF } from '@react-three/drei';
-import { BookOpen, Settings, LogOut, Menu, X, Play, Square, Eye, Hand } from 'lucide-react';
+import { FolderOpen, Settings, LogOut, Menu, X, Play, Square, Eye, Hand, Sparkles, Mic, MicOff } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import * as THREE from 'three';
 
@@ -15,7 +15,6 @@ function AvatarHumano({ modoAnimacion }: { modoAnimacion: 'reposo' | 'traduciend
   const { scene } = useGLTF('/avatar.glb'); 
   const avatarRef = useRef<THREE.Group>(null);
   
-  // Referencias a los huesos del avatar
   const rightArm = useRef<THREE.Object3D | null>(null);
   const leftArm = useRef<THREE.Object3D | null>(null);
   const rightForeArm = useRef<THREE.Object3D | null>(null);
@@ -32,34 +31,25 @@ function AvatarHumano({ modoAnimacion }: { modoAnimacion: 'reposo' | 'traduciend
       }
     });
 
-    // Romper la Pose T al inicio
     if (rightArm.current) rightArm.current.rotation.z = -1.2;
     if (leftArm.current) leftArm.current.rotation.z = 1.2;
   }, [scene]);
 
   useFrame((state) => {
     const t = state.clock.getElapsedTime();
-    
-    if (avatarRef.current) {
-      avatarRef.current.position.y = -1.5 + Math.sin(t * 2) * 0.02; // Respiración
-    }
+    if (avatarRef.current) avatarRef.current.position.y = -1.5 + Math.sin(t * 2) * 0.02;
 
     if (modoAnimacion === 'hola') {
-      // SEÑA REAL: "Hola" (Saludo)
-      // Levanta el brazo derecho y dobla el codo
       if (rightArm.current) {
-        rightArm.current.rotation.z = -0.2; // Levanta el brazo a nivel del hombro
-        rightArm.current.rotation.y = Math.sin(t * 8) * 0.4; // Movimiento de saludo (saluda con la mano)
+        rightArm.current.rotation.z = -0.2; 
+        rightArm.current.rotation.y = Math.sin(t * 8) * 0.4; 
       }
-      if (rightForeArm.current) {
-        rightForeArm.current.rotation.x = -1.0; // Dobla el codo hacia arriba
-      }
-      // Brazo izquierdo se queda abajo
+      if (rightForeArm.current) rightForeArm.current.rotation.x = -1.0; 
+      
       if (leftArm.current) leftArm.current.rotation.z = 1.2;
       if (leftForeArm.current) leftForeArm.current.rotation.x = -0.1;
       
     } else if (modoAnimacion === 'traduciendo') {
-      // SEÑA PROCEDURAL: Simulación rápida
       if (rightArm.current) rightArm.current.rotation.z = -0.5 + Math.sin(t * 10) * 0.2;
       if (rightForeArm.current) rightForeArm.current.rotation.x = -1.2 + Math.cos(t * 15) * 0.5;
       
@@ -67,10 +57,8 @@ function AvatarHumano({ modoAnimacion }: { modoAnimacion: 'reposo' | 'traduciend
       if (leftForeArm.current) leftForeArm.current.rotation.x = -1.0 + Math.cos(t * 14) * 0.4;
       
     } else {
-      // REPOSO: Brazos abajo relajados
       if (rightArm.current) rightArm.current.rotation.z = -1.2 + Math.sin(t) * 0.05;
       if (rightForeArm.current) rightForeArm.current.rotation.x = -0.1;
-      
       if (leftArm.current) leftArm.current.rotation.z = 1.2 + Math.sin(t) * 0.05;
       if (leftForeArm.current) leftForeArm.current.rotation.x = -0.1;
     }
@@ -83,9 +71,11 @@ export default function AvatarPage() {
   const router = useRouter();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [texto, setTexto] = useState('');
-  
-  // Estado que controla qué hace el avatar
   const [modoAnimacion, setModoAnimacion] = useState<'reposo' | 'traduciendo' | 'hola'>('reposo');
+  
+  // Nuevo estado para el micrófono
+  const [isListening, setIsListening] = useState(false);
+  const recognitionRef = useRef<any>(null);
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
@@ -98,105 +88,167 @@ export default function AvatarPage() {
     setTimeout(() => setModoAnimacion('reposo'), texto.length * 300);
   };
 
-  // Función exclusiva para el saludo "Hola"
   const decirHola = () => {
     setModoAnimacion('hola');
-    // Saluda durante 3 segundos y luego vuelve a reposo
     setTimeout(() => setModoAnimacion('reposo'), 3000);
+  };
+
+  // Función de Reconocimiento de Voz
+  const toggleListening = () => {
+    if (isListening) {
+      if (recognitionRef.current) recognitionRef.current.stop();
+      setIsListening(false);
+      return;
+    }
+
+    // Compatibilidad webkit para Chrome/Edge/Safari móviles
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      alert('Tu navegador no soporta el reconocimiento de voz. Intenta desde Google Chrome.');
+      return;
+    }
+
+    const recognition = new SpeechRecognition();
+    recognitionRef.current = recognition;
+    recognition.lang = 'es-PE'; // Configurado para acento peruano
+    recognition.continuous = true;
+    recognition.interimResults = true;
+
+    recognition.onstart = () => setIsListening(true);
+    
+    recognition.onresult = (event: any) => {
+      let transcripcionActual = '';
+      for (let i = 0; i < event.results.length; i++) {
+        transcripcionActual += event.results[i][0].transcript;
+      }
+      setTexto(transcripcionActual);
+    };
+
+    recognition.onerror = () => setIsListening(false);
+    recognition.onend = () => setIsListening(false);
+
+    recognition.start();
   };
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col md:flex-row">
+      
+      {/* MENÚ MÓVIL (Estilo B2C) */}
       <div className="md:hidden bg-indigo-900 text-white p-4 flex justify-between items-center shadow-md z-20">
-        <div>
-          <h2 className="text-xl font-bold tracking-tight">Signocronía</h2>
-          <p className="text-indigo-300 text-xs">Módulo Visual 3D</p>
+        <div className="flex items-center gap-2">
+          <Sparkles className="w-5 h-5 text-indigo-300" />
+          <div>
+            <h2 className="text-xl font-bold tracking-tight">Signocronía</h2>
+            <p className="text-indigo-300 text-xs">Espacio Inclusivo</p>
+          </div>
         </div>
         <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="p-2 bg-indigo-800 rounded-lg">
           {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
         </button>
       </div>
 
-      <aside className={`${isMobileMenuOpen ? 'flex' : 'hidden'} md:flex w-full md:w-64 bg-indigo-900 text-white flex-col md:absolute md:relative z-30 h-full`}>
-        <div className="p-6 hidden md:block">
-          <h2 className="text-xl font-bold tracking-tight">Signocronía</h2>
-          <p className="text-indigo-300 text-xs mt-1">Panel Institucional</p>
+      {/* MENÚ LATERAL (Estilo B2C) */}
+      <aside className={`${isMobileMenuOpen ? 'flex' : 'hidden'} md:flex w-full md:w-64 bg-indigo-900 text-white flex-col md:absolute md:relative z-30 h-full shadow-xl`}>
+        <div className="p-6 hidden md:flex items-center gap-3">
+          <div className="w-10 h-10 bg-indigo-800 rounded-xl flex items-center justify-center">
+            <Sparkles className="w-6 h-6 text-indigo-300" />
+          </div>
+          <div>
+            <h2 className="text-xl font-bold tracking-tight">Signocronía</h2>
+            <p className="text-indigo-300 text-xs mt-0.5">Espacio Inclusivo</p>
+          </div>
         </div>
-        <nav className="flex-1 px-4 py-6 md:py-0 space-y-2">
-          <a href="/dashboard" className="flex items-center gap-3 hover:bg-indigo-800/50 text-indigo-100 px-4 py-3 rounded-lg transition-colors">
-            <BookOpen className="w-5 h-5 text-teal-400" />
-            <span className="font-medium">Mis Cursos</span>
+        <nav className="flex-1 px-4 py-6 md:py-4 space-y-2">
+          <a href="/dashboard" className="flex items-center gap-3 hover:bg-indigo-800/50 text-indigo-100 px-4 py-3 rounded-xl transition-colors">
+            <FolderOpen className="w-5 h-5 text-teal-400" />
+            <span className="font-medium">Mis Documentos</span>
           </a>
-          <a href="/haptico" className="flex items-center gap-3 hover:bg-indigo-800/50 text-indigo-100 px-4 py-3 rounded-lg transition-colors">
+          <a href="/haptico" className="flex items-center gap-3 hover:bg-indigo-800/50 text-indigo-100 px-4 py-3 rounded-xl transition-colors">
             <Settings className="w-5 h-5" />
-            <span>Módulo Háptico</span>
+            <span>Traductor Háptico</span>
           </a>
-          <a href="#" className="flex items-center gap-3 bg-indigo-800 text-white px-4 py-3 rounded-lg transition-colors">
+          <a href="#" className="flex items-center gap-3 bg-indigo-800 text-white px-4 py-3 rounded-xl transition-colors shadow-inner border border-indigo-700/50">
             <Eye className="w-5 h-5 text-emerald-400" />
-            <span>Avatar 3D</span>
+            <span>Intérprete 3D</span>
           </a>
         </nav>
-        <div className="p-4 border-t border-indigo-800 mt-auto">
-          <button onClick={handleSignOut} className="flex items-center gap-3 text-indigo-200 hover:text-white transition-colors w-full px-4 py-2">
+        <div className="p-4 border-t border-indigo-800/50 mt-auto">
+          <button onClick={handleSignOut} className="flex items-center gap-3 text-indigo-300 hover:text-white transition-colors w-full px-4 py-2 rounded-lg hover:bg-indigo-800/50">
             <LogOut className="w-5 h-5" />
             <span>Cerrar Sesión</span>
           </button>
         </div>
       </aside>
 
+      {/* LIENZO 3D Y CONTROLES */}
       <main className="flex-1 flex flex-col h-screen overflow-hidden bg-slate-900 relative">
         <div className="absolute inset-0 z-0">
           <Canvas camera={{ position: [0, 1.5, 6], fov: 45 }}>
             <ambientLight intensity={0.6} />
             <spotLight position={[10, 10, 10]} angle={0.15} penumbra={1} intensity={1.5} castShadow />
             <Environment preset="city" />
-            
             <Suspense fallback={null}>
               <AvatarHumano modoAnimacion={modoAnimacion} />
             </Suspense>
-
             <ContactShadows position={[0, -1.2, 0]} opacity={0.6} scale={10} blur={2} far={4} />
             <OrbitControls enableZoom={false} maxPolarAngle={Math.PI / 2} minPolarAngle={Math.PI / 3} />
           </Canvas>
         </div>
         
-        <div className="absolute bottom-0 left-0 right-0 p-4 md:p-0 md:top-6 md:right-6 md:left-auto md:bottom-auto md:w-96 z-10 pointer-events-auto">
-             <div className="bg-slate-800/90 backdrop-blur-md p-5 md:p-6 rounded-2xl border border-slate-700 shadow-2xl mb-4 md:mb-0">
-                <h1 className="text-xl font-bold text-white mb-2">Traductor Visual 3D</h1>
-                <p className="text-slate-400 text-sm mb-4 hidden md:block">Escribe un texto y el motor WebGL simulará la dactilología espacial.</p>
+        {/* PANEL DE INTERACCIÓN */}
+        <div className="absolute bottom-0 left-0 right-0 p-4 md:p-0 md:top-6 md:right-6 md:left-auto md:bottom-auto md:w-[420px] z-10 pointer-events-auto">
+             <div className="bg-slate-800/90 backdrop-blur-md p-5 md:p-6 rounded-3xl border border-slate-700 shadow-2xl mb-4 md:mb-0">
+                <h1 className="text-xl font-bold text-white mb-2">Intérprete Virtual 3D</h1>
+                <p className="text-slate-400 text-sm mb-4 hidden md:block">Dicta o escribe un texto para ver la simulación de señas.</p>
                 
-                <textarea 
-                  rows={2}
-                  value={texto}
-                  onChange={(e) => setTexto(e.target.value)}
-                  placeholder="Ingresa texto..."
-                  className="w-full p-3 bg-slate-900/50 border border-slate-600 rounded-xl text-white outline-none focus:border-emerald-500 mb-4 resize-none placeholder:text-slate-500"
-                ></textarea>
+                {/* Caja de texto + Botón de Micrófono Integrado */}
+                <div className="relative mb-4">
+                  <textarea 
+                    rows={3}
+                    value={texto}
+                    onChange={(e) => setTexto(e.target.value)}
+                    placeholder="Escribe o dicta tu mensaje..."
+                    className="w-full p-4 pr-14 bg-slate-900/60 border-2 border-slate-700 rounded-2xl text-white outline-none focus:border-emerald-500 resize-none font-medium placeholder:text-slate-500"
+                  ></textarea>
+                  
+                  {/* Botón Flotante del Micrófono */}
+                  <button 
+                    onClick={toggleListening}
+                    className={`absolute bottom-4 right-4 p-3 rounded-xl transition-all shadow-md ${
+                      isListening 
+                      ? 'bg-rose-500 hover:bg-rose-600 text-white shadow-rose-500/30 animate-pulse' 
+                      : 'bg-slate-700 hover:bg-slate-600 text-slate-300'
+                    }`}
+                    title={isListening ? 'Detener micrófono' : 'Hablar por micrófono'}
+                  >
+                    {isListening ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
+                  </button>
+                </div>
 
-                {/* Contenedor de Botones (Traducción + Hola) */}
+                {/* Botones de Acción */}
                 <div className="flex gap-3">
                   <button 
                     onClick={simulateTranslation}
-                    disabled={modoAnimacion !== 'reposo'}
-                    className={`flex-1 py-3 rounded-xl font-bold flex items-center justify-center gap-2 transition-all ${
-                      modoAnimacion !== 'reposo' 
-                      ? 'bg-slate-700 text-slate-400 cursor-not-allowed' 
+                    disabled={modoAnimacion !== 'reposo' || !texto.trim()}
+                    className={`flex-1 py-3.5 rounded-xl font-bold flex items-center justify-center gap-2 transition-all ${
+                      modoAnimacion !== 'reposo' || !texto.trim()
+                      ? 'bg-slate-700 text-slate-500 cursor-not-allowed' 
                       : 'bg-emerald-500 hover:bg-emerald-600 text-slate-900 shadow-lg shadow-emerald-500/20'
                     }`}
                   >
-                    {modoAnimacion === 'traduciendo' ? <><Square className="w-5 h-5 animate-spin" /> Procesando...</> : <><Play className="w-5 h-5" /> Traducir</>}
+                    {modoAnimacion === 'traduciendo' ? <><Square className="w-5 h-5 animate-spin" /> Simulando...</> : <><Play className="w-5 h-5" /> Traducir</>}
                   </button>
 
                   <button 
                     onClick={decirHola}
                     disabled={modoAnimacion !== 'reposo'}
-                    className={`py-3 px-4 rounded-xl font-bold flex items-center justify-center transition-all ${
+                    className={`py-3.5 px-5 rounded-xl font-bold flex items-center justify-center transition-all ${
                       modoAnimacion !== 'reposo' 
-                      ? 'bg-slate-700 text-slate-400 cursor-not-allowed' 
+                      ? 'bg-slate-700 text-slate-500 cursor-not-allowed' 
                       : 'bg-indigo-500 hover:bg-indigo-600 text-white shadow-lg shadow-indigo-500/20'
                     }`}
                   >
-                    <Hand className="w-5 h-5 mr-1" /> Hola
+                    <Hand className="w-5 h-5 mr-1.5" /> Hola
                   </button>
                 </div>
              </div>
