@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { BrainCircuit, Volume2, Activity, Eye, Menu, X, ArrowRight, Sparkles, Mic } from 'lucide-react';
+import { BrainCircuit, Volume2, Activity, Eye, Menu, X, ArrowRight, Sparkles, Mic, ShieldCheck, Globe, Users } from 'lucide-react';
 
 export default function LandingPage() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -11,7 +11,7 @@ export default function LandingPage() {
     <div className="min-h-screen bg-slate-50 font-sans text-slate-900 overflow-x-hidden">
       
       {/* ---------------- NAVBAR ---------------- */}
-      <header className="bg-white/80 backdrop-blur-md sticky top-0 z-50 border-b border-slate-200">
+      <header className="bg-white/90 backdrop-blur-md sticky top-0 z-50 border-b border-slate-200 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-20">
             <div className="flex items-center gap-2">
@@ -22,10 +22,11 @@ export default function LandingPage() {
             </div>
             
             <nav className="hidden md:flex items-center gap-8 font-medium text-slate-600">
-              <a href="#caracteristicas" className="hover:text-indigo-600 transition-colors">Características</a>
-              <Link href="/login" className="text-indigo-600 hover:text-indigo-700 font-semibold">Iniciar Sesión</Link>
-              <Link href="/login" className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2.5 rounded-full transition-all shadow-md shadow-indigo-200">
-                Probar Gratis
+              <a href="#impacto" className="hover:text-indigo-600 transition-colors">Impacto Social</a>
+              <a href="#tecnologia" className="hover:text-indigo-600 transition-colors">Tecnología</a>
+              <Link href="/login" className="text-indigo-600 hover:text-indigo-700 font-bold">Iniciar Sesión</Link>
+              <Link href="/login" className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2.5 rounded-full transition-all shadow-md shadow-indigo-200 font-bold">
+                Acceso a la Plataforma
               </Link>
             </nav>
 
@@ -38,119 +39,171 @@ export default function LandingPage() {
           </div>
         </div>
 
+        {/* Menú Móvil */}
         {isMobileMenuOpen && (
-          <div className="md:hidden bg-white border-b border-slate-200 px-4 pt-2 pb-6 shadow-xl absolute w-full left-0">
-            <a href="#caracteristicas" onClick={() => setIsMobileMenuOpen(false)} className="block text-slate-600 font-medium py-3 border-b border-slate-100">Características</a>
+          <div className="md:hidden bg-white border-b border-slate-200 px-4 pt-2 pb-6 shadow-xl absolute w-full left-0 animate-in slide-in-from-top-2">
+            <a href="#impacto" onClick={() => setIsMobileMenuOpen(false)} className="block text-slate-600 font-medium py-3 border-b border-slate-100">Impacto Social</a>
+            <a href="#tecnologia" onClick={() => setIsMobileMenuOpen(false)} className="block text-slate-600 font-medium py-3 border-b border-slate-100">Tecnología Base</a>
             <Link href="/login" className="block text-indigo-600 font-bold py-3 mt-2 text-center">Iniciar Sesión</Link>
-            <Link href="/login" className="block bg-indigo-600 text-white text-center px-6 py-3.5 rounded-xl font-bold mt-3 shadow-md">Comenzar Gratis Ahora</Link>
+            <Link href="/login" className="block bg-indigo-600 text-white text-center px-6 py-3.5 rounded-xl font-bold mt-3 shadow-md">Acceder a la Plataforma</Link>
           </div>
         )}
       </header>
 
       {/* ---------------- HERO SECTION ---------------- */}
-      <section className="relative pt-16 pb-20 md:pt-32 md:pb-32 overflow-hidden">
+      <section className="relative pt-20 pb-24 md:pt-32 md:pb-40 overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="text-center max-w-3xl mx-auto">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-indigo-50 border border-indigo-100 text-indigo-700 font-semibold text-xs md:text-sm mb-6">
+          <div className="text-center max-w-4xl mx-auto">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-indigo-50 border border-indigo-100 text-indigo-700 font-semibold text-xs md:text-sm mb-8 shadow-sm">
               <span className="flex h-2.5 w-2.5 rounded-full bg-indigo-600 animate-pulse"></span>
-              Plataforma DeepTech Inclusiva
+              Plataforma DeepTech B2C de Inclusión Digital
             </div>
-            <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight text-slate-900 mb-6 leading-tight">
-              Educación Sin Barreras con <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-teal-500">IA</span>
+            
+            <h1 className="text-4xl md:text-6xl lg:text-7xl font-extrabold tracking-tight text-slate-900 mb-8 leading-tight">
+              Educación y Accesibilidad Sin Barreras impulsadas por <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-teal-500">Inteligencia Artificial</span>
             </h1>
-            <p className="text-lg md:text-xl text-slate-600 mb-10 leading-relaxed px-2 md:px-0">
-              Transformamos documentos en experiencias accesibles. Resúmenes, voz, dactilología 3D y traducción háptica.
+            
+            <p className="text-lg md:text-xl text-slate-600 mb-12 leading-relaxed px-4 md:px-12 font-medium">
+              Signocronía no es solo un software, es un ecosistema de empoderamiento. Transformamos información compleja en experiencias multisensoriales a través de resúmenes cognitivos, síntesis de voz, dactilología holográfica y tecnología háptica.
             </p>
             
-            {/* BOTONES SIMPLIFICADOS */}
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 px-2 sm:px-0">
-              <Link href="/login" className="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-4 rounded-xl md:rounded-full font-bold text-lg transition-all shadow-xl shadow-indigo-200 flex items-center justify-center gap-2">
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-5 px-4 sm:px-0">
+              <Link href="/login" className="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-4.5 rounded-2xl font-bold text-lg transition-all shadow-xl shadow-indigo-200 flex items-center justify-center gap-2">
                 Ingresar al Dashboard <ArrowRight className="w-5 h-5" />
               </Link>
-              
-              {/* NUEVO BOTÓN DIRECTO A GEMINI */}
-              <a 
-                href="https://gemini.google.com" 
-                target="_blank" 
-                rel="noopener noreferrer" 
-                className="w-full sm:w-auto bg-amber-400 hover:bg-amber-500 text-slate-900 border-2 border-amber-400 px-8 py-4 rounded-xl md:rounded-full font-bold text-lg transition-all flex items-center justify-center shadow-lg"
-              >
-                <Mic className="w-5 h-5 mr-2" /> IA para Adultos Mayores
-              </a>
+              <Link href="/adultos-mayores" className="w-full sm:w-auto bg-amber-400 hover:bg-amber-500 text-slate-900 px-8 py-4.5 rounded-2xl font-bold text-lg transition-all shadow-xl shadow-amber-200/50 flex items-center justify-center gap-2">
+                <Mic className="w-5 h-5" /> Módulo Adultos Mayores
+              </Link>
+            </div>
+          </div>
+        </div>
+        
+        {/* Decoración de fondo */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] md:w-[1000px] md:h-[1000px] bg-gradient-to-tr from-indigo-100/60 to-teal-50/60 rounded-full blur-3xl -z-10 pointer-events-none"></div>
+      </section>
+
+      {/* ---------------- SECCIÓN DE IMPACTO SOCIAL (NUEVA) ---------------- */}
+      <section id="impacto" className="py-24 bg-slate-900 text-white relative overflow-hidden">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-5xl font-bold mb-6">Diseñado para incluir a todos</h2>
+            <p className="text-slate-400 max-w-3xl mx-auto text-lg leading-relaxed">
+              La tecnología pierde su propósito si deja a las minorías atrás. Hemos construido interfaces adaptativas que responden a las necesidades específicas de cada grupo poblacional.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="bg-slate-800/50 p-8 rounded-3xl border border-slate-700 hover:bg-slate-800 transition-colors">
+              <Globe className="w-12 h-12 text-teal-400 mb-6" />
+              <h3 className="text-2xl font-bold mb-4">Comunidad Sorda y Ciega</h3>
+              <p className="text-slate-400 leading-relaxed">
+                Nuestra Inteligencia Artificial traduce textos a dactilología en 3D mediante WebGL y utiliza la API de vibración de los dispositivos móviles para transmitir información en código Morse y Braille lineal.
+              </p>
+            </div>
+            
+            <div className="bg-slate-800/50 p-8 rounded-3xl border border-slate-700 hover:bg-slate-800 transition-colors">
+              <Users className="w-12 h-12 text-amber-400 mb-6" />
+              <h3 className="text-2xl font-bold mb-4">Adultos Mayores</h3>
+              <p className="text-slate-400 leading-relaxed">
+                Interfaces de ultra-alto contraste, botones maximizados y un asistente conversacional empático diseñado para guiar paso a paso, combatir la brecha digital y cuidar la fatiga visual.
+              </p>
+            </div>
+
+            <div className="bg-slate-800/50 p-8 rounded-3xl border border-slate-700 hover:bg-slate-800 transition-colors">
+              <ShieldCheck className="w-12 h-12 text-indigo-400 mb-6" />
+              <h3 className="text-2xl font-bold mb-4">Estudiantes y Profesionales</h3>
+              <p className="text-slate-400 leading-relaxed">
+                Procesamiento de Lenguaje Natural (NLP) capaz de leer documentos complejos en formato PDF o TXT y generar resúmenes ejecutivos precisos, optimizando el tiempo de aprendizaje.
+              </p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* ---------------- CARACTERÍSTICAS ---------------- */}
-      <section id="caracteristicas" className="py-20 bg-white">
+      {/* ---------------- SECCIÓN DE TECNOLOGÍA (CARACTERÍSTICAS) ---------------- */}
+      <section id="tecnologia" className="py-24 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16 px-4">
-            <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4">Nuestra Arquitectura Tecnológica</h2>
-            <p className="text-slate-600 max-w-2xl mx-auto text-lg">Integramos cuatro motores fundamentales para garantizar que el aprendizaje sea verdaderamente universal.</p>
+          <div className="text-center mb-20">
+            <h2 className="text-3xl md:text-5xl font-bold text-slate-900 mb-6">Arquitectura Tecnológica Profunda</h2>
+            <p className="text-slate-600 max-w-3xl mx-auto text-lg leading-relaxed">
+              Signocronía se apoya en cuatro motores fundamentales de desarrollo avanzado (DeepTech) para garantizar un despliegue rápido, seguro y universal.
+            </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
-            <div className="bg-slate-50 rounded-3xl p-6 md:p-8 border border-slate-100 hover:shadow-xl transition-all group">
-              <div className="w-14 h-14 bg-indigo-100 text-indigo-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                <BrainCircuit className="w-7 h-7" />
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+            <div className="bg-slate-50 rounded-3xl p-8 border border-slate-100 hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 group">
+              <div className="w-16 h-16 bg-indigo-100 text-indigo-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                <BrainCircuit className="w-8 h-8" />
               </div>
-              <h3 className="text-xl font-bold text-slate-900 mb-3">Motor de IA</h3>
-              <p className="text-slate-600 leading-relaxed">Procesamiento de lenguaje natural avanzado para analizar textos y generar resúmenes.</p>
+              <h3 className="text-xl font-bold text-slate-900 mb-4">Motor de Inteligencia Artificial</h3>
+              <p className="text-slate-600 leading-relaxed text-sm">
+                Integración directa con modelos generativos de última generación. Analiza semánticamente la información para reestructurarla en formatos más fáciles de digerir.
+              </p>
             </div>
 
-            <div className="bg-slate-50 rounded-3xl p-6 md:p-8 border border-slate-100 hover:shadow-xl transition-all group">
-              <div className="w-14 h-14 bg-teal-100 text-teal-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                <Volume2 className="w-7 h-7" />
+            <div className="bg-slate-50 rounded-3xl p-8 border border-slate-100 hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 group">
+              <div className="w-16 h-16 bg-teal-100 text-teal-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                <Volume2 className="w-8 h-8" />
               </div>
-              <h3 className="text-xl font-bold text-slate-900 mb-3">Síntesis de Voz</h3>
-              <p className="text-slate-600 leading-relaxed">Conversión de texto a audio en tiempo real, adaptado perfectamente para discapacidad visual.</p>
+              <h3 className="text-xl font-bold text-slate-900 mb-4">Síntesis de Voz Nativa</h3>
+              <p className="text-slate-600 leading-relaxed text-sm">
+                Implementación de la Web Speech API para convertir texto a audio en tiempo real, adaptado con acento local y controles de velocidad para discapacidad visual.
+              </p>
             </div>
 
-            <div className="bg-slate-50 rounded-3xl p-6 md:p-8 border border-slate-100 hover:shadow-xl transition-all group">
-              <div className="w-14 h-14 bg-rose-100 text-rose-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                <Activity className="w-7 h-7" />
+            <div className="bg-slate-50 rounded-3xl p-8 border border-slate-100 hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 group">
+              <div className="w-16 h-16 bg-rose-100 text-rose-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                <Activity className="w-8 h-8" />
               </div>
-              <h3 className="text-xl font-bold text-slate-900 mb-3">Traductor Háptico</h3>
-              <p className="text-slate-600 leading-relaxed">Traducción de textos a vibraciones físicas en Braille Lineal y Código Morse mediante hardware.</p>
+              <h3 className="text-xl font-bold text-slate-900 mb-4">Traductor Háptico Universal</h3>
+              <p className="text-slate-600 leading-relaxed text-sm">
+                Algoritmos matemáticos que sincronizan el texto con el motor físico del hardware (celulares/tablets) para emitir pulsaciones táctiles interpretables.
+              </p>
             </div>
 
-            <div className="bg-slate-50 rounded-3xl p-6 md:p-8 border border-slate-100 hover:shadow-xl transition-all group">
-              <div className="w-14 h-14 bg-emerald-100 text-emerald-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                <Eye className="w-7 h-7" />
+            <div className="bg-slate-50 rounded-3xl p-8 border border-slate-100 hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 group">
+              <div className="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                <Eye className="w-8 h-8" />
               </div>
-              <h3 className="text-xl font-bold text-slate-900 mb-3">Avatar WebGL 3D</h3>
-              <p className="text-slate-600 leading-relaxed">Visión artificial y renderizado tridimensional para simular dactilología procedural.</p>
+              <h3 className="text-xl font-bold text-slate-900 mb-4">Renderizado WebGL 3D</h3>
+              <p className="text-slate-600 leading-relaxed text-sm">
+                Uso de React Three Fiber y Computer Vision (Lectura de manos por IA) para proyectar un avatar holográfico procedural que interactúa con el usuario.
+              </p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* ---------------- BANNER MINIMALISTA (Tercera Edad) ---------------- */}
-      <section className="bg-slate-100 py-12 border-t border-slate-200">
-        <div className="max-w-4xl mx-auto px-4 text-center">
-          <h2 className="text-2xl font-bold text-slate-800 mb-6">¿Busca una experiencia más sencilla?</h2>
-          <a 
-            href="https://gemini.google.com" 
-            target="_blank" 
-            rel="noopener noreferrer" 
-            className="inline-flex items-center justify-center gap-3 bg-amber-400 hover:bg-amber-500 text-slate-900 px-8 py-4 rounded-2xl font-bold text-lg transition-transform hover:scale-105 shadow-md"
+      {/* ---------------- BANNER INCLUSIVO (Tercera Edad) ---------------- */}
+      <section className="bg-indigo-900 py-16 border-y border-indigo-800">
+        <div className="max-w-5xl mx-auto px-4 text-center">
+          <h2 className="text-3xl font-bold text-white mb-6">Asistente Especializado para la Tercera Edad</h2>
+          <p className="text-indigo-200 mb-10 max-w-2xl mx-auto text-lg">
+            Hemos configurado un agente de Inteligencia Artificial que comprende las necesidades del adulto mayor. Es paciente, responde con voz, usa letras grandes y cuida su bienestar.
+          </p>
+          
+          <Link 
+            href="/adultos-mayores" 
+            className="inline-flex items-center justify-center gap-3 bg-amber-400 hover:bg-amber-500 text-slate-900 px-10 py-5 rounded-2xl font-bold text-xl transition-transform hover:scale-105 shadow-[0_10px_20px_rgba(0,0,0,0.3)]"
           >
-            <Mic className="w-6 h-6" />
-            Abrir Asistente por Voz (Gemini)
-          </a>
+            <Mic className="w-7 h-7" />
+            Acceder al Módulo de Voz
+          </Link>
         </div>
       </section>
 
       {/* ---------------- FOOTER ---------------- */}
-      <footer className="bg-slate-900 text-slate-400 py-12">
-        <div className="max-w-7xl mx-auto px-4 text-center">
-          <div className="flex justify-center items-center gap-2 mb-4">
+      <footer className="bg-slate-950 text-slate-500 py-16">
+        <div className="max-w-7xl mx-auto px-4 flex flex-col md:flex-row justify-between items-center gap-6">
+          <div className="flex items-center gap-2">
             <Sparkles className="w-6 h-6 text-indigo-500" />
             <span className="font-bold text-xl text-white tracking-tight">Signocronía</span>
           </div>
-          <p className="mb-6 text-sm">Construido desde Loreto, Perú, para revolucionar la educación inclusiva.</p>
-          <p className="text-xs">© {new Date().getFullYear()} Signocronía. Todos los derechos reservados.</p>
+          <p className="text-sm text-center md:text-left">
+            Construido con propósito desde Loreto, Perú. <br className="md:hidden" />
+            Para revolucionar la educación inclusiva a nivel global.
+          </p>
+          <p className="text-sm font-medium">© {new Date().getFullYear()} Todos los derechos reservados.</p>
         </div>
       </footer>
     </div>
