@@ -38,21 +38,30 @@ export default function AdultosMayoresPage() {
     try {
       const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
       if (!apiKey) {
-        throw new Error("Llave no detectada en Vercel o archivo local.");
+        throw new Error("Llave no detectada.");
       }
 
       const genAI = new GoogleGenerativeAI(apiKey);
+      
+      // EL CAMBIO MÁGICO ESTÁ AQUÍ: Cambiamos a 'gemini-pro'
       const model = genAI.getGenerativeModel({ 
-        model: 'gemini-1.5-flash',
-        systemInstruction: "Eres un asistente virtual diseñado exclusivamente para adultos mayores. Tu objetivo es acompañar y ayudar. Tono: extremadamente paciente, respetuoso (trata de 'Usted'), afectuoso. Regla ESTRICTA: Tus respuestas deben ser MUY cortas (máximo 2 o 3 oraciones). Cero palabras técnicas, cero anglicismos. Si el usuario se frustra, cálmalo diciendo 'No se preocupe, vamos paso a paso'. Cada cierto tiempo recuérdale beber agua o descansar la vista."
+        model: 'gemini-pro'
       });
 
-      const chat = model.startChat({
-        history: nuevoHistorial.filter(m => m.rol !== 'sistema').map(m => ({
-          role: m.rol === 'usuario' ? 'user' : 'model',
-          parts: [{ text: m.texto }],
-        })),
-      });
+      // En gemini-pro antiguo, inyectamos la instrucción directamente en el historial para asegurar que la obedezca
+      const instruccionSistema = "Eres un asistente virtual diseñado exclusivamente para adultos mayores. Tu objetivo es acompañar y ayudar. Tono: extremadamente paciente, respetuoso (trata de 'Usted'), afectuoso. Regla ESTRICTA: Tus respuestas deben ser MUY cortas (máximo 2 o 3 oraciones). Cero palabras técnicas, cero anglicismos. Si el usuario se frustra, cálmalo diciendo 'No se preocupe, vamos paso a paso'. Cada cierto tiempo recuérdale beber agua o descansar la vista.";
+
+      const historialParaGemini = nuevoHistorial.filter(m => m.rol !== 'sistema').map(m => ({
+        role: m.rol === 'usuario' ? 'user' : 'model',
+        parts: [{ text: m.texto }],
+      }));
+
+      // Insertamos la regla al principio de la memoria
+      if (historialParaGemini.length > 0) {
+         historialParaGemini[0].parts[0].text = `${instruccionSistema}\n\nMensaje del usuario: ${historialParaGemini[0].parts[0].text}`;
+      }
+
+      const chat = model.startChat({ history: historialParaGemini });
 
       const result = await chat.sendMessage(textoAEnviar);
       const respuestaIA = result.response.text();
@@ -61,14 +70,15 @@ export default function AdultosMayoresPage() {
       leerEnVozAlta(respuestaIA); 
 
     } catch (error: any) {
-      console.error("Error en conexión directa a Gemini:", error);
-      // IMPRIMIR EL ERROR REAL EN PANTALLA PARA DIAGNÓSTICO
-      const mensajeAmigable = `ERROR REAL: ${error.message || JSON.stringify(error)}`;
+      console.error("Error en conexión a Gemini:", error);
+      // Devolvemos el mensaje amable para el usuario
+      const mensajeAmigable = "Disculpe, tuve un pequeño mareo con mi conexión. ¿Podríamos intentar de nuevo?";
       setHistorial([...nuevoHistorial, { rol: 'sistema', texto: mensajeAmigable }]);
+      leerEnVozAlta(mensajeAmigable);
     } finally {
       setIsCargando(false);
     }
-  }; // <--- ESTA ES LA LLAVE QUE FALTABA Y CAUSABA EL ERROR ROJO
+  };
 
   const leerEnVozAlta = (texto: string) => {
     if ('speechSynthesis' in window) {
