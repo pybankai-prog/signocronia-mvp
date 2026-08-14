@@ -131,35 +131,28 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ---------------- SECCIÓN TERCERA EDAD (ALTA ACCESIBILIDAD) ---------------- */}
+      {/* ---------------- SECCIÓN TERCERA EDAD ---------------- */}
       <section id="tercera-edad" className="bg-[#003366] py-24 border-y-8 border-[#002244]">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          
+        <div className="max-w-5xl mx-auto px-4 text-center">
           <div className="flex justify-center mb-8">
             <div className="bg-white/20 p-5 rounded-full">
               <Volume2 className="w-16 h-16 text-white" />
             </div>
           </div>
-
-          <p className="text-white text-2xl md:text-4xl font-sans font-bold mb-14 leading-normal tracking-wide max-w-4xl mx-auto">
-            Haga clic en el botón amarillo de abajo para hablar con nuestra Inteligencia Artificial. No necesita escribir, puede usar su voz presionando el micrófono al entrar.
+          <p className="text-white text-2xl md:text-4xl font-sans font-bold mb-14 leading-normal max-w-4xl mx-auto">
+            Haga clic en el botón amarillo de abajo para hablar con nuestra Inteligencia Artificial. No necesita escribir.
           </p>
-          
           <div className="py-6 px-4">
-            <a 
-              href="/adultos-mayores"
-              target="_blank"
-              rel="noopener noreferrer"
+            <Link 
+              href="/adultos-mayores" 
               className="inline-flex items-center justify-center gap-4 bg-[#FFD700] hover:bg-[#FFC000] text-black px-8 py-8 md:px-16 md:py-10 rounded-[2.5rem] font-sans font-extrabold text-2xl md:text-5xl transition-transform hover:scale-105 shadow-[0_15px_30px_rgba(0,0,0,0.6)] focus:ring-8 focus:ring-yellow-300 outline-none w-full md:w-auto"
             >
               <Mic className="w-10 h-10 md:w-16 md:h-16 text-black shrink-0" />
               <span className="text-center">IA para adultos mayores</span>
-            </a>
+            </Link>
           </div>
-
         </div>
       </section>
-
       {/* ---------------- FOOTER ---------------- */}
       <footer className="bg-slate-900 text-slate-400 py-12">
         <div className="max-w-7xl mx-auto px-4 text-center">
