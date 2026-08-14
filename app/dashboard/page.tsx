@@ -2,8 +2,9 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
-import { FolderOpen, UploadCloud, Settings, LogOut, Loader2, FileText, BrainCircuit, Volume2, Square, Menu, X, Eye, Sparkles } from 'lucide-react';
+import { FolderOpen, UploadCloud, Settings, LogOut, Loader2, FileText, BrainCircuit, Volume2, Square, Menu, X, Eye, Sparkles, BookA } from 'lucide-react';
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -176,11 +177,16 @@ export default function DashboardPage() {
         </div>
         
         <nav className="flex-1 px-4 py-6 md:py-4 space-y-2">
-          {/* Cambiamos "Mis Cursos" por "Mis Documentos" */}
           <a href="#" className="flex items-center gap-3 bg-indigo-800 text-white px-4 py-3 rounded-xl transition-colors shadow-inner border border-indigo-700/50">
             <FolderOpen className="w-5 h-5 text-teal-400" />
             <span className="font-medium">Mis Documentos</span>
           </a>
+          
+          <Link href="/dashboard/aprender-ingles" className="flex items-center gap-3 hover:bg-indigo-800/50 text-indigo-100 px-4 py-3 rounded-xl transition-colors">
+            <BookA className="w-5 h-5 text-amber-400" />
+            <span>Academia de Inglés</span>
+          </Link>
+
           <a href="/haptico" className="flex items-center gap-3 hover:bg-indigo-800/50 text-indigo-100 px-4 py-3 rounded-xl transition-colors">
             <Settings className="w-5 h-5" />
             <span>Traductor Háptico</span>
@@ -206,6 +212,31 @@ export default function DashboardPage() {
           <p className="text-slate-500 mt-2">Sube cualquier texto y adáptalo a tus necesidades visuales, auditivas o táctiles.</p>
         </header>
 
+        {/* Sección: Módulos Educativos */}
+        <div className="mb-6 md:mb-10">
+          <h2 className="text-xl font-bold text-slate-800 mb-4">Módulos de Aprendizaje</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            
+            {/* TARJETA DE ACCESO A LA ACADEMIA DE INGLÉS */}
+            <Link href="/dashboard/aprender-ingles" className="bg-white p-6 rounded-3xl border border-slate-200 shadow-md hover:shadow-xl transition-all hover:-translate-y-1 group flex flex-col justify-between h-full">
+              <div>
+                <div className="w-14 h-14 bg-indigo-100 rounded-2xl flex items-center justify-center mb-4 group-hover:bg-indigo-600 transition-colors">
+                  <BookA className="w-7 h-7 text-indigo-600 group-hover:text-white transition-colors" />
+                </div>
+                <h3 className="text-xl font-bold text-slate-900 mb-2">Academia de Inglés</h3>
+                <p className="text-slate-500 text-sm leading-relaxed mb-4">
+                  Aprende inglés escrito adaptado desde la Lengua de Señas Peruana (LSP). Materiales y flashcards.
+                </p>
+              </div>
+              <div className="flex items-center gap-2 text-indigo-600 font-bold text-sm">
+                Ingresar al módulo <span className="group-hover:translate-x-1 transition-transform">→</span>
+              </div>
+            </Link>
+
+          </div>
+        </div>
+
+        <h2 className="text-xl font-bold text-slate-800 mb-4">Herramientas de Procesamiento</h2>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8 mb-6 md:mb-8">
           
           {/* Tarjeta Subida */}
