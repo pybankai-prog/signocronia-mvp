@@ -35,48 +35,25 @@ export default function AdultosMayoresPage() {
     setIsCargando(true);
 
     try {
-      // 1. LEEMOS LA LLAVE DE GROQ
-      const apiKey = process.env.NEXT_PUBLIC_GROQ_API_KEY;
-      if (!apiKey) {
-        throw new Error("Llave de Groq no detectada.");
-      }
-
-      // 2. PREPARAMOS LA MEMORIA PARA GROQ
-      const historialParaGroq = nuevoHistorial.filter(m => m.rol !== 'sistema').map(m => ({
-        role: m.rol === 'usuario' ? 'user' : 'assistant',
-        content: m.texto
-      }));
-
-      // 3. INSTRUCCIONES DE PERSONALIDAD
-      const instruccionSistema = {
-        role: "system",
-        content: "Eres un asistente virtual empático para adultos mayores en Perú. Trata de 'Usted'. Regla ESTRICTA: Tus respuestas deben ser MUY cortas (máximo 2 oraciones). Cero palabras técnicas."
-      };
-
-      // 4. LLAMAMOS A GROQ DIRECTAMENTE (Súper rápido)
-      const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          "Authorization": `Bearer ${apiKey}`,
-          "Content-Type": "application/json"
-        },
+      // 1. LLAMAMOS A TU PROPIO SERVIDOR (Para evitar los bloqueos de seguridad)
+      const respuestaServidor = await fetch('/api/gemini', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          model: "llama3-8b-8192", // Modelo ultra rápido
-          messages: [instruccionSistema, ...historialParaGroq],
-          temperature: 0.7,
-          max_tokens: 150
-        })
+          texto: textoAEnviar,
+          historial: historial.filter(m => m.rol !== 'sistema')
+        }),
       });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error?.message || "Error conectando a Groq");
+      const data = await respuestaServidor.json();
+
+      if (!respuestaServidor.ok) {
+        throw new Error(data.error || "El servidor rechazó la conexión.");
       }
 
-      const data = await response.json();
-      const respuestaIA = data.choices[0].message.content;
+      const respuestaIA = data.respuesta;
 
-      // 5. GUARDAMOS Y HABLAMOS
+      // 2. GUARDAMOS Y HABLAMOS
       setHistorial([...nuevoHistorial, { rol: 'asistente', texto: respuestaIA }]);
       leerEnVozAlta(respuestaIA); 
 
