@@ -3,7 +3,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { Mic, MicOff, Volume2, ArrowLeft, Send, Loader2, AlertCircle } from 'lucide-react';
-import { GoogleGenerativeAI } from '@google/generative-ai';
 
 export default function AdultosMayoresPage() {
   const [mensaje, setMensaje] = useState('');
@@ -36,45 +35,55 @@ export default function AdultosMayoresPage() {
     setIsCargando(true);
 
     try {
-      const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
+      // 1. LEEMOS LA LLAVE DE GROQ
+      const apiKey = process.env.NEXT_PUBLIC_GROQ_API_KEY;
       if (!apiKey) {
-        throw new Error("Llave no detectada.");
+        throw new Error("Llave de Groq no detectada.");
       }
 
-      const genAI = new GoogleGenerativeAI(apiKey);
-      
-      // EL CAMBIO MÁGICO ESTÁ AQUÍ: Cambiamos a 'gemini-pro'
-      const model = genAI.getGenerativeModel({ 
-        model: 'gemini-pro'
-      });
-
-      // En gemini-pro antiguo, inyectamos la instrucción directamente en el historial para asegurar que la obedezca
-      const instruccionSistema = "Eres un asistente virtual diseñado exclusivamente para adultos mayores. Tu objetivo es acompañar y ayudar. Tono: extremadamente paciente, respetuoso (trata de 'Usted'), afectuoso. Regla ESTRICTA: Tus respuestas deben ser MUY cortas (máximo 2 o 3 oraciones). Cero palabras técnicas, cero anglicismos. Si el usuario se frustra, cálmalo diciendo 'No se preocupe, vamos paso a paso'. Cada cierto tiempo recuérdale beber agua o descansar la vista.";
-
-      const historialParaGemini = nuevoHistorial.filter(m => m.rol !== 'sistema').map(m => ({
-        role: m.rol === 'usuario' ? 'user' : 'model',
-        parts: [{ text: m.texto }],
+      // 2. PREPARAMOS LA MEMORIA PARA GROQ
+      const historialParaGroq = nuevoHistorial.filter(m => m.rol !== 'sistema').map(m => ({
+        role: m.rol === 'usuario' ? 'user' : 'assistant',
+        content: m.texto
       }));
 
-      // Insertamos la regla al principio de la memoria
-      if (historialParaGemini.length > 0) {
-         historialParaGemini[0].parts[0].text = `${instruccionSistema}\n\nMensaje del usuario: ${historialParaGemini[0].parts[0].text}`;
+      // 3. INSTRUCCIONES DE PERSONALIDAD
+      const instruccionSistema = {
+        role: "system",
+        content: "Eres un asistente virtual empático para adultos mayores en Perú. Trata de 'Usted'. Regla ESTRICTA: Tus respuestas deben ser MUY cortas (máximo 2 oraciones). Cero palabras técnicas."
+      };
+
+      // 4. LLAMAMOS A GROQ DIRECTAMENTE (Súper rápido)
+      const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${apiKey}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          model: "llama3-8b-8192", // Modelo ultra rápido
+          messages: [instruccionSistema, ...historialParaGroq],
+          temperature: 0.7,
+          max_tokens: 150
+        })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error?.message || "Error conectando a Groq");
       }
 
-      const chat = model.startChat({ history: historialParaGemini });
+      const data = await response.json();
+      const respuestaIA = data.choices[0].message.content;
 
-      const result = await chat.sendMessage(textoAEnviar);
-      const respuestaIA = result.response.text();
-
+      // 5. GUARDAMOS Y HABLAMOS
       setHistorial([...nuevoHistorial, { rol: 'asistente', texto: respuestaIA }]);
       leerEnVozAlta(respuestaIA); 
 
     } catch (error: any) {
-      console.error("Error en conexión a Gemini:", error);
-      // Devolvemos el mensaje amable para el usuario
-      const mensajeAmigable = "Disculpe, tuve un pequeño mareo con mi conexión. ¿Podríamos intentar de nuevo?";
+      console.error("Error técnico:", error);
+      const mensajeAmigable = `ERROR REAL: ${error.message}`;
       setHistorial([...nuevoHistorial, { rol: 'sistema', texto: mensajeAmigable }]);
-      leerEnVozAlta(mensajeAmigable);
     } finally {
       setIsCargando(false);
     }
@@ -85,7 +94,7 @@ export default function AdultosMayoresPage() {
       window.speechSynthesis.cancel();
       const textoLimpio = texto.replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F700}-\u{1F77F}\u{1F780}-\u{1F7FF}\u{1F800}-\u{1F8FF}\u{1F900}-\u{1F9FF}\u{1FA00}-\u{1FA6F}\u{1FA70}-\u{1FAFF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{2300}-\u{23FF}]/gu, '');
       const utterance = new SpeechSynthesisUtterance(textoLimpio);
-      utterance.lang = 'es-ES';
+      utterance.lang = 'es-PE';
       utterance.rate = 0.9;
       window.speechSynthesis.speak(utterance);
     }
