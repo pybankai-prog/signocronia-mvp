@@ -63,13 +63,12 @@ export default function AdultosMayoresPage() {
 
     } catch (error: any) {
       console.error("Error en conexión directa a Gemini:", error);
-      const mensajeAmigable = "Disculpe, tuve un pequeño mareo con mi conexión. ¿Podríamos intentar de nuevo?";
+      // TEMPORAL: Mostramos el error técnico crudo en pantalla para diagnosticar
+      const mensajeAmigable = `ERROR TÉCNICO GOOGLE: ${error.message || "Error desconocido"}`;
       setHistorial([...nuevoHistorial, { rol: 'sistema', texto: mensajeAmigable }]);
-      leerEnVozAlta(mensajeAmigable);
     } finally {
       setIsCargando(false);
     }
-  };
 
   const leerEnVozAlta = (texto: string) => {
     if ('speechSynthesis' in window) {
