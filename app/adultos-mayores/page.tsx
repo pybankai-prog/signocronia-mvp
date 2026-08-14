@@ -3,6 +3,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { Mic, MicOff, Volume2, ArrowLeft, Send, Loader2, AlertCircle } from 'lucide-react';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 
 export default function AdultosMayoresPage() {
   const [mensaje, setMensaje] = useState('');
@@ -35,36 +36,33 @@ export default function AdultosMayoresPage() {
     setIsCargando(true);
 
     try {
-      // Preparamos el historial (sin el último mensaje) para mandarlo al servidor
-      const historialPrevio = historial.filter(m => m.rol !== 'sistema').map(m => ({
-        role: m.rol === 'usuario' ? 'user' : 'model',
-        parts: [{ text: m.texto }],
-      }));
-
-      // AHORA LLAMAMOS A TU PROPIO SERVIDOR SEGURO, NO A GOOGLE DIRECTAMENTE
-      const respuestaServidor = await fetch('/api/gemini', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          texto: textoAEnviar,
-          historial: historialPrevio
-        }),
-      });
-
-      if (!respuestaServidor.ok) {
-        throw new Error("El servidor seguro rechazó la conexión.");
+      // Conexión Directa a Gemini (Front-End) para evitar errores de servidor local
+      const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
+      if (!apiKey) {
+        throw new Error("Llave no detectada.");
       }
 
-      const data = await respuestaServidor.json();
-      const respuestaIA = data.respuesta;
+      const genAI = new GoogleGenerativeAI(apiKey);
+      const model = genAI.getGenerativeModel({ 
+        model: 'gemini-1.5-flash',
+        systemInstruction: "Eres un asistente virtual diseñado exclusivamente para adultos mayores. Tu objetivo es acompañar y ayudar. Tono: extremadamente paciente, respetuoso (trata de 'Usted'), afectuoso. Regla ESTRICTA: Tus respuestas deben ser MUY cortas (máximo 2 o 3 oraciones). Cero palabras técnicas, cero anglicismos. Si el usuario se frustra, cálmalo diciendo 'No se preocupe, vamos paso a paso'. Cada cierto tiempo recuérdale beber agua o descansar la vista."
+      });
+
+      const chat = model.startChat({
+        history: nuevoHistorial.filter(m => m.rol !== 'sistema').map(m => ({
+          role: m.rol === 'usuario' ? 'user' : 'model',
+          parts: [{ text: m.texto }],
+        })),
+      });
+
+      const result = await chat.sendMessage(textoAEnviar);
+      const respuestaIA = result.response.text();
 
       setHistorial([...nuevoHistorial, { rol: 'asistente', texto: respuestaIA }]);
       leerEnVozAlta(respuestaIA); 
 
     } catch (error: any) {
-      console.error("Error de comunicación frontend-backend:", error);
+      console.error("Error en conexión directa a Gemini:", error);
       const mensajeAmigable = "Disculpe, tuve un pequeño mareo con mi conexión. ¿Podríamos intentar de nuevo?";
       setHistorial([...nuevoHistorial, { rol: 'sistema', texto: mensajeAmigable }]);
       leerEnVozAlta(mensajeAmigable);
@@ -120,79 +118,81 @@ export default function AdultosMayoresPage() {
 
   return (
     <div className="min-h-screen bg-[#003366] font-sans flex flex-col">
-      <header className="bg-[#002244] p-6 shadow-md flex items-center gap-6">
-        <Link href="/" className="bg-white/10 p-4 rounded-full text-white hover:bg-white/20 transition-colors">
-          <ArrowLeft className="w-8 h-8 md:w-12 md:h-12" />
+      <header className="bg-[#002244] p-4 md:p-6 shadow-md flex items-center gap-4 md:gap-6 fixed top-0 w-full z-20">
+        <Link href="/" className="bg-white/10 p-3 md:p-4 rounded-full text-white hover:bg-white/20 transition-colors shrink-0">
+          <ArrowLeft className="w-6 h-6 md:w-12 md:h-12" />
         </Link>
-        <div>
-          <h1 className="text-3xl md:text-5xl font-extrabold text-white">Su Asistente Personal</h1>
-          <p className="text-xl md:text-2xl text-yellow-300 mt-2 font-medium">Toque el micrófono amarillo para hablar conmigo.</p>
+        <div className="min-w-0">
+          <h1 className="text-2xl md:text-5xl font-extrabold text-white truncate">Su Asistente Personal</h1>
+          <p className="text-sm md:text-2xl text-yellow-300 mt-1 md:mt-2 font-medium truncate">Toque el micrófono amarillo.</p>
         </div>
       </header>
 
-      <main className="flex-1 p-6 md:p-10 overflow-y-auto space-y-8 max-w-5xl mx-auto w-full pb-32">
+      {/* pb-[280px] asegura que el chat no quede oculto detrás de los botones del celular */}
+      <main className="flex-1 p-4 md:p-10 overflow-y-auto space-y-6 max-w-5xl mx-auto w-full pt-28 md:pt-36 pb-[280px] md:pb-48">
         {historial.length === 0 && (
-          <div className="text-center mt-20">
-            <Volume2 className="w-24 h-24 text-white/20 mx-auto mb-6" />
-            <p className="text-3xl md:text-4xl text-white/50 font-bold leading-relaxed">
-              ¡Hola! Estoy listo para ayudarle. <br/> Presione el micrófono abajo y cuénteme qué necesita.
+          <div className="text-center mt-10 md:mt-20">
+            <Volume2 className="w-16 h-16 md:w-24 md:h-24 text-white/20 mx-auto mb-4 md:mb-6" />
+            <p className="text-xl md:text-4xl text-white/50 font-bold leading-relaxed">
+              ¡Hola! Estoy listo para ayudarle. <br className="hidden md:block"/> Presione el micrófono abajo.
             </p>
           </div>
         )}
 
         {historial.map((msg, idx) => (
           <div key={idx} className={`flex ${msg.rol === 'usuario' ? 'justify-end' : 'justify-start'}`}>
-            <div className={`p-6 md:p-8 rounded-3xl max-w-[85%] shadow-lg ${
+            <div className={`p-4 md:p-8 rounded-3xl max-w-[90%] shadow-lg ${
               msg.rol === 'usuario' 
               ? 'bg-blue-500 text-white rounded-br-none' 
               : msg.rol === 'sistema'
               ? 'bg-amber-100 text-amber-900 border-4 border-amber-400 rounded-bl-none'
               : 'bg-white text-black rounded-bl-none border-4 border-yellow-400'
             }`}>
-              {msg.rol === 'sistema' && <AlertCircle className="w-10 h-10 mb-4 text-amber-600" />}
-              <p className="text-2xl md:text-4xl font-medium leading-normal">{msg.texto}</p>
+              {msg.rol === 'sistema' && <AlertCircle className="w-6 h-6 md:w-10 md:h-10 mb-2 md:mb-4 text-amber-600" />}
+              <p className="text-lg md:text-4xl font-medium leading-relaxed">{msg.texto}</p>
             </div>
           </div>
         ))}
         {isCargando && (
           <div className="flex justify-start">
-            <div className="bg-white p-6 rounded-3xl rounded-bl-none shadow-lg flex items-center gap-4">
-              <Loader2 className="w-10 h-10 animate-spin text-[#003366]" />
-              <p className="text-2xl font-medium text-slate-500">Escribiendo...</p>
+            <div className="bg-white p-4 md:p-6 rounded-3xl rounded-bl-none shadow-lg flex items-center gap-3">
+              <Loader2 className="w-6 h-6 md:w-10 md:h-10 animate-spin text-[#003366]" />
+              <p className="text-lg md:text-2xl font-medium text-slate-500">Escribiendo...</p>
             </div>
           </div>
         )}
         <div ref={chatFinalRef} />
       </main>
 
-      <footer className="bg-[#002244] p-6 md:p-10 border-t-8 border-yellow-400 fixed bottom-0 w-full z-10">
-        <div className="max-w-5xl mx-auto flex flex-col md:flex-row gap-6">
+      {/* Rediseño de Footer para encajar perfecto en Celulares */}
+      <footer className="bg-[#002244] p-4 md:p-8 border-t-4 md:border-t-8 border-yellow-400 fixed bottom-0 left-0 right-0 z-50">
+        <div className="max-w-5xl mx-auto flex flex-col md:flex-row gap-3 md:gap-6">
           <button 
             onClick={toggleMicrofono}
-            className={`flex-none p-8 md:p-10 rounded-full flex items-center justify-center transition-all shadow-[0_10px_20px_rgba(0,0,0,0.4)] ${
+            className={`w-full md:w-auto p-4 md:p-8 rounded-full flex items-center justify-center transition-all shadow-[0_5px_15px_rgba(0,0,0,0.4)] ${
               isEscuchando 
-              ? 'bg-rose-500 text-white animate-pulse scale-105' 
+              ? 'bg-rose-500 text-white animate-pulse' 
               : 'bg-[#FFD700] hover:bg-[#FFC000] text-black'
             }`}
           >
-            {isEscuchando ? <MicOff className="w-16 h-16" /> : <Mic className="w-16 h-16" />}
+            {isEscuchando ? <MicOff className="w-10 h-10 md:w-16 md:h-16" /> : <Mic className="w-10 h-10 md:w-16 md:h-16" />}
           </button>
           
-          <div className="flex-1 flex gap-4">
+          <div className="flex flex-1 w-full gap-2 md:gap-4">
             <input 
               type="text" 
               value={mensaje}
               onChange={(e) => setMensaje(e.target.value)}
               onKeyPress={(e) => e.key === 'Enter' && enviarMensaje(mensaje)}
-              placeholder="O escriba aquí si prefiere..."
-              className="flex-1 text-2xl md:text-3xl p-6 md:p-8 rounded-3xl font-medium text-black focus:outline-none focus:ring-8 focus:ring-blue-400"
+              placeholder="O escriba aquí..."
+              className="flex-1 min-w-0 text-base md:text-3xl p-4 md:p-8 rounded-2xl md:rounded-3xl font-medium text-black focus:outline-none focus:ring-4 focus:ring-blue-400"
             />
             <button 
               onClick={() => enviarMensaje(mensaje)}
               disabled={!mensaje.trim() || isCargando}
-              className="bg-blue-600 hover:bg-blue-500 disabled:bg-blue-800 text-white p-6 md:p-8 rounded-3xl transition-colors shadow-lg"
+              className="bg-blue-600 hover:bg-blue-500 disabled:bg-blue-800 text-white p-4 md:p-8 rounded-2xl md:rounded-3xl transition-colors shadow-lg shrink-0"
             >
-              <Send className="w-12 h-12 md:w-16 md:h-16" />
+              <Send className="w-6 h-6 md:w-16 md:h-16" />
             </button>
           </div>
         </div>

@@ -10,7 +10,6 @@ export default function LandingPage() {
   return (
     <div className="min-h-screen bg-slate-50 font-sans text-slate-900 overflow-x-hidden">
       
-      {/* ---------------- NAVBAR ---------------- */}
       <header className="bg-white/90 backdrop-blur-md sticky top-0 z-50 border-b border-slate-200 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-20">
@@ -49,7 +48,6 @@ export default function LandingPage() {
         )}
       </header>
 
-      {/* ---------------- HERO SECTION ---------------- */}
       <section className="relative pt-20 pb-24 md:pt-32 md:pb-40 overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="text-center max-w-4xl mx-auto">
@@ -59,11 +57,11 @@ export default function LandingPage() {
             </div>
             
             <h1 className="text-4xl md:text-6xl lg:text-7xl font-extrabold tracking-tight text-slate-900 mb-8 leading-tight">
-              Educación Sin Barreras para la <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-teal-500">Diversidad Humana</span>
+              Educación Sin Barreras impulsada por <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-teal-500">Inteligencia Artificial</span>
             </h1>
             
             <p className="text-lg md:text-xl text-slate-600 mb-12 leading-relaxed px-4 md:px-12 font-medium">
-              Diseñada para la comunidad sorda, muda, personas ciegas y adultos mayores. Transformamos la información a través de Inteligencia Artificial, síntesis de voz nativa y dactilología holográfica.
+              Diseñada para la comunidad sorda, muda, personas ciegas y adultos mayores. Transformamos la información a través de IA, síntesis de voz nativa y dactilología holográfica.
             </p>
             
             <div className="flex flex-col sm:flex-row items-center justify-center gap-5 px-4 sm:px-0">
@@ -79,7 +77,6 @@ export default function LandingPage() {
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] md:w-[1000px] md:h-[1000px] bg-gradient-to-tr from-indigo-100/60 to-teal-50/60 rounded-full blur-3xl -z-10 pointer-events-none"></div>
       </section>
 
-      {/* ---------------- SECCIÓN DE IMPACTO SOCIAL (CORREGIDA) ---------------- */}
       <section id="impacto" className="py-24 bg-slate-900 text-white relative overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="text-center mb-16">
@@ -89,9 +86,7 @@ export default function LandingPage() {
             </p>
           </div>
 
-          {/* Cambié a 4 columnas para que nadie se quede afuera */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            
             <div className="bg-slate-800/50 p-6 rounded-3xl border border-slate-700 hover:bg-slate-800 transition-colors">
               <Globe className="w-10 h-10 text-teal-400 mb-5" />
               <h3 className="text-xl font-bold mb-3">Comunidad Sorda y Muda</h3>
@@ -123,12 +118,10 @@ export default function LandingPage() {
                 Procesamiento de Inteligencia Artificial capaz de leer PDFs densos y estructurar resúmenes exactos para optimizar el aprendizaje.
               </p>
             </div>
-
           </div>
         </div>
       </section>
 
-      {/* ---------------- SECCIÓN DE TECNOLOGÍA (CARACTERÍSTICAS) ---------------- */}
       <section id="tecnologia" className="py-24 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-20">
@@ -182,7 +175,6 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ---------------- BANNER INCLUSIVO (Tercera Edad) ---------------- */}
       <section className="bg-indigo-900 py-16 border-y border-indigo-800">
         <div className="max-w-5xl mx-auto px-4 text-center">
           <h2 className="text-3xl font-bold text-white mb-6">Asistente Especializado para la Tercera Edad</h2>
@@ -199,7 +191,6 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ---------------- FOOTER ---------------- */}
       <footer className="bg-slate-950 text-slate-500 py-16">
         <div className="max-w-7xl mx-auto px-4 flex flex-col md:flex-row justify-between items-center gap-6">
           <div className="flex items-center gap-2">
