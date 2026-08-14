@@ -3,7 +3,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { Mic, MicOff, Volume2, ArrowLeft, Send, Loader2, AlertCircle } from 'lucide-react';
-import { GoogleGenerativeAI } from '@google/generative-ai';
 
 export default function AdultosMayoresPage() {
   const [mensaje, setMensaje] = useState('');
@@ -18,7 +17,6 @@ export default function AdultosMayoresPage() {
     chatFinalRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [historial]);
 
-  // Hack para desbloquear el audio en navegadores estrictos
   const desbloquearAudio = () => {
     if ('speechSynthesis' in window) {
       const dummy = new SpeechSynthesisUtterance('');
@@ -29,7 +27,6 @@ export default function AdultosMayoresPage() {
   const enviarMensaje = async (textoAEnviar: string) => {
     if (!textoAEnviar.trim()) return;
 
-    // Desbloqueamos el audio en el primer clic
     if (historial.length === 0) desbloquearAudio();
 
     const nuevoHistorial = [...historial, { rol: 'usuario', texto: textoAEnviar }];
@@ -38,35 +35,39 @@ export default function AdultosMayoresPage() {
     setIsCargando(true);
 
     try {
-      // 1. VERIFICAR QUE LA LLAVE EXISTA
-      const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
-      if (!apiKey) {
-        throw new Error("Falta la Llave de API. Por favor, asegúrate de haber creado el archivo .env.local y de haber REINICIADO tu servidor (Ctrl+C y npm run dev).");
+      // Preparamos el historial (sin el último mensaje) para mandarlo al servidor
+      const historialPrevio = historial.filter(m => m.rol !== 'sistema').map(m => ({
+        role: m.rol === 'usuario' ? 'user' : 'model',
+        parts: [{ text: m.texto }],
+      }));
+
+      // AHORA LLAMAMOS A TU PROPIO SERVIDOR SEGURO, NO A GOOGLE DIRECTAMENTE
+      const respuestaServidor = await fetch('/api/gemini', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          texto: textoAEnviar,
+          historial: historialPrevio
+        }),
+      });
+
+      if (!respuestaServidor.ok) {
+        throw new Error("El servidor seguro rechazó la conexión.");
       }
 
-      const genAI = new GoogleGenerativeAI(apiKey);
-      const model = genAI.getGenerativeModel({ 
-        model: 'gemini-1.5-flash',
-        systemInstruction: "Eres un asistente virtual diseñado exclusivamente para adultos mayores. Tu objetivo es acompañar y ayudar. Tono: extremadamente paciente, respetuoso (trata de 'Usted'), afectuoso. Regla ESTRICTA: Tus respuestas deben ser MUY cortas (máximo 2 o 3 oraciones). Cero palabras técnicas, cero anglicismos (no digas link, app, click). Si el usuario se frustra, cálmalo diciendo 'No se preocupe, vamos paso a paso'. Cada cierto tiempo recuérdale beber agua o descansar la vista."
-      });
-
-      const chat = model.startChat({
-        history: nuevoHistorial.filter(m => m.rol !== 'sistema').map(m => ({
-          role: m.rol === 'usuario' ? 'user' : 'model',
-          parts: [{ text: m.texto }],
-        })),
-      });
-
-      const result = await chat.sendMessage(textoAEnviar);
-      const respuestaIA = result.response.text();
+      const data = await respuestaServidor.json();
+      const respuestaIA = data.respuesta;
 
       setHistorial([...nuevoHistorial, { rol: 'asistente', texto: respuestaIA }]);
       leerEnVozAlta(respuestaIA); 
 
     } catch (error: any) {
-      console.error("Error técnico de Gemini:", error);
-      const motivo = error.message || "Error desconocido de conexión.";
-      setHistorial([...nuevoHistorial, { rol: 'sistema', texto: `⚠️ Problema Técnico: ${motivo}` }]);
+      console.error("Error de comunicación frontend-backend:", error);
+      const mensajeAmigable = "Disculpe, tuve un pequeño mareo con mi conexión. ¿Podríamos intentar de nuevo?";
+      setHistorial([...nuevoHistorial, { rol: 'sistema', texto: mensajeAmigable }]);
+      leerEnVozAlta(mensajeAmigable);
     } finally {
       setIsCargando(false);
     }
@@ -75,9 +76,7 @@ export default function AdultosMayoresPage() {
   const leerEnVozAlta = (texto: string) => {
     if ('speechSynthesis' in window) {
       window.speechSynthesis.cancel();
-      // Quitamos emojis e íconos para que la voz no los lea raro
       const textoLimpio = texto.replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F700}-\u{1F77F}\u{1F780}-\u{1F7FF}\u{1F800}-\u{1F8FF}\u{1F900}-\u{1F9FF}\u{1FA00}-\u{1FA6F}\u{1FA70}-\u{1FAFF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{2300}-\u{23FF}]/gu, '');
-      
       const utterance = new SpeechSynthesisUtterance(textoLimpio);
       utterance.lang = 'es-ES';
       utterance.rate = 0.9;
@@ -147,10 +146,10 @@ export default function AdultosMayoresPage() {
               msg.rol === 'usuario' 
               ? 'bg-blue-500 text-white rounded-br-none' 
               : msg.rol === 'sistema'
-              ? 'bg-rose-100 text-rose-800 border-4 border-rose-400 rounded-bl-none'
+              ? 'bg-amber-100 text-amber-900 border-4 border-amber-400 rounded-bl-none'
               : 'bg-white text-black rounded-bl-none border-4 border-yellow-400'
             }`}>
-              {msg.rol === 'sistema' && <AlertCircle className="w-10 h-10 mb-4 text-rose-600" />}
+              {msg.rol === 'sistema' && <AlertCircle className="w-10 h-10 mb-4 text-amber-600" />}
               <p className="text-2xl md:text-4xl font-medium leading-normal">{msg.texto}</p>
             </div>
           </div>
