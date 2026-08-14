@@ -61,7 +61,7 @@ export default function LandingPage() {
             </h1>
             
             <p className="text-lg md:text-xl text-slate-600 mb-12 leading-relaxed px-4 md:px-12 font-medium">
-              Diseñada para la comunidad sorda, muda, personas ciegas y adultos mayores. Transformamos la información a través de IA, síntesis de voz nativa y dactilología holográfica.
+              Diseñada para personas sordas, personas ciegas, personas no verbales y adultos mayores. Transformamos la información a través de IA, síntesis de voz nativa y dactilología holográfica.
             </p>
             
             <div className="flex flex-col sm:flex-row items-center justify-center gap-5 px-4 sm:px-0">
@@ -89,7 +89,7 @@ export default function LandingPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             <div className="bg-slate-800/50 p-6 rounded-3xl border border-slate-700 hover:bg-slate-800 transition-colors">
               <Globe className="w-10 h-10 text-teal-400 mb-5" />
-              <h3 className="text-xl font-bold mb-3">Comunidad Sorda y Muda</h3>
+              <h3 className="text-xl font-bold mb-3">Personas Sordas y No Verbales</h3>
               <p className="text-slate-400 text-sm leading-relaxed">
                 El motor WebGL 3D proyecta Lengua de Señas (LSP) y dactilología espacial interactiva para facilitar la comunicación bidireccional.
               </p>
@@ -115,7 +115,7 @@ export default function LandingPage() {
               <ShieldCheck className="w-10 h-10 text-indigo-400 mb-5" />
               <h3 className="text-xl font-bold mb-3">Estudiantes</h3>
               <p className="text-slate-400 text-sm leading-relaxed">
-                Procesamiento de Inteligencia Artificial capaz de leer PDFs densos y estructurar resúmenes exactos para optimizar el aprendizaje.
+                Procesamiento de Inteligencia Artificial capaz de leer documentos densos y estructurar resúmenes exactos para optimizar el aprendizaje.
               </p>
             </div>
           </div>
@@ -168,7 +168,7 @@ export default function LandingPage() {
               </div>
               <h3 className="text-xl font-bold text-slate-900 mb-4">Renderizado WebGL 3D</h3>
               <p className="text-slate-600 leading-relaxed text-sm">
-                Computer Vision y un avatar holográfico para comunicarse con la comunidad muda y sorda mediante señas.
+                Computer Vision y un avatar holográfico para comunicarse con personas sordas y no verbales mediante señas.
               </p>
             </div>
           </div>

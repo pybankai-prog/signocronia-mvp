@@ -63,8 +63,8 @@ export default function AdultosMayoresPage() {
 
     } catch (error: any) {
       console.error("Error en conexión directa a Gemini:", error);
-      // TEMPORAL: Mostramos el error técnico crudo en pantalla para diagnosticar
-      const mensajeAmigable = `ERROR TÉCNICO GOOGLE: ${error.message || "Error desconocido"}`;
+      // IMPRIMIR EL ERROR REAL EN PANTALLA PARA DIAGNÓSTICO
+      const mensajeAmigable = `ERROR REAL: ${error.message || JSON.stringify(error)}`;
       setHistorial([...nuevoHistorial, { rol: 'sistema', texto: mensajeAmigable }]);
     } finally {
       setIsCargando(false);
