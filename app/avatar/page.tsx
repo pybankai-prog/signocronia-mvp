@@ -9,7 +9,7 @@ import { supabase } from '@/lib/supabase';
 import * as THREE from 'three';
 
 // ---------------------------------------------------------
-// EL AVATAR HUMANO (Con Animación Procedural y Seña "Hola")
+// EL AVATAR HUMANO (Matemáticas de Esqueleto Corregidas)
 // ---------------------------------------------------------
 function AvatarHumano({ modoAnimacion }: { modoAnimacion: 'reposo' | 'traduciendo' | 'hola' }) {
   const { scene } = useGLTF('/avatar.glb'); 
@@ -40,11 +40,15 @@ function AvatarHumano({ modoAnimacion }: { modoAnimacion: 'reposo' | 'traduciend
     if (avatarRef.current) avatarRef.current.position.y = -1.5 + Math.sin(t * 2) * 0.02;
 
     if (modoAnimacion === 'hola') {
+      // CORRECCIÓN DEL SALUDO "HOLA"
       if (rightArm.current) {
-        rightArm.current.rotation.z = -0.2; 
-        rightArm.current.rotation.y = Math.sin(t * 8) * 0.4; 
+        rightArm.current.rotation.z = -0.5; // Levanta el hombro a la mitad
+        rightArm.current.rotation.x = -0.5; // Lo adelanta hacia el pecho
       }
-      if (rightForeArm.current) rightForeArm.current.rotation.x = -1.0; 
+      if (rightForeArm.current) {
+        rightForeArm.current.rotation.x = -1.8; // Dobla el codo hacia la cara
+        rightForeArm.current.rotation.z = Math.sin(t * 10) * 0.4; // Mueve la mano de lado a lado
+      }
       
       if (leftArm.current) leftArm.current.rotation.z = 1.2;
       if (leftForeArm.current) leftForeArm.current.rotation.x = -0.1;
@@ -58,7 +62,10 @@ function AvatarHumano({ modoAnimacion }: { modoAnimacion: 'reposo' | 'traduciend
       
     } else {
       if (rightArm.current) rightArm.current.rotation.z = -1.2 + Math.sin(t) * 0.05;
+      if (rightArm.current) rightArm.current.rotation.x = 0; // Resetea el eje X
       if (rightForeArm.current) rightForeArm.current.rotation.x = -0.1;
+      if (rightForeArm.current) rightForeArm.current.rotation.z = 0; // Resetea el eje Z
+      
       if (leftArm.current) leftArm.current.rotation.z = 1.2 + Math.sin(t) * 0.05;
       if (leftForeArm.current) leftForeArm.current.rotation.x = -0.1;
     }
@@ -73,7 +80,6 @@ export default function AvatarPage() {
   const [texto, setTexto] = useState('');
   const [modoAnimacion, setModoAnimacion] = useState<'reposo' | 'traduciendo' | 'hola'>('reposo');
   
-  // Nuevo estado para el micrófono
   const [isListening, setIsListening] = useState(false);
   const recognitionRef = useRef<any>(null);
 
@@ -93,7 +99,7 @@ export default function AvatarPage() {
     setTimeout(() => setModoAnimacion('reposo'), 3000);
   };
 
-  // Función de Reconocimiento de Voz
+  // Función de Reconocimiento de Voz con Capturador de Errores
   const toggleListening = () => {
     if (isListening) {
       if (recognitionRef.current) recognitionRef.current.stop();
@@ -101,39 +107,51 @@ export default function AvatarPage() {
       return;
     }
 
-    // Compatibilidad webkit para Chrome/Edge/Safari móviles
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     if (!SpeechRecognition) {
       alert('Tu navegador no soporta el reconocimiento de voz. Intenta desde Google Chrome.');
       return;
     }
 
-    const recognition = new SpeechRecognition();
-    recognitionRef.current = recognition;
-    recognition.lang = 'es-PE'; // Configurado para acento peruano
-    recognition.continuous = true;
-    recognition.interimResults = true;
+    try {
+      const recognition = new SpeechRecognition();
+      recognitionRef.current = recognition;
+      recognition.lang = 'es-PE';
+      recognition.continuous = true;
+      recognition.interimResults = true;
 
-    recognition.onstart = () => setIsListening(true);
-    
-    recognition.onresult = (event: any) => {
-      let transcripcionActual = '';
-      for (let i = 0; i < event.results.length; i++) {
-        transcripcionActual += event.results[i][0].transcript;
-      }
-      setTexto(transcripcionActual);
-    };
+      recognition.onstart = () => setIsListening(true);
+      
+      recognition.onresult = (event: any) => {
+        let transcripcionActual = '';
+        for (let i = 0; i < event.results.length; i++) {
+          transcripcionActual += event.results[i][0].transcript;
+        }
+        setTexto(transcripcionActual);
+      };
 
-    recognition.onerror = () => setIsListening(false);
-    recognition.onend = () => setIsListening(false);
+      // DETECTOR DE ERRORES EXACTOS
+      recognition.onerror = (event: any) => {
+        setIsListening(false);
+        if (event.error === 'not-allowed') {
+          alert('Permiso denegado. Tienes que permitir el uso del micrófono en la configuración de tu navegador.');
+        } else {
+          alert(`El micrófono se detuvo por este error: ${event.error}`);
+        }
+      };
 
-    recognition.start();
+      recognition.onend = () => setIsListening(false);
+
+      recognition.start();
+    } catch (error) {
+      console.error(error);
+      alert('Hubo un problema al encender el micrófono de tu dispositivo.');
+      setIsListening(false);
+    }
   };
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col md:flex-row">
-      
-      {/* MENÚ MÓVIL (Estilo B2C) */}
       <div className="md:hidden bg-indigo-900 text-white p-4 flex justify-between items-center shadow-md z-20">
         <div className="flex items-center gap-2">
           <Sparkles className="w-5 h-5 text-indigo-300" />
@@ -147,7 +165,6 @@ export default function AvatarPage() {
         </button>
       </div>
 
-      {/* MENÚ LATERAL (Estilo B2C) */}
       <aside className={`${isMobileMenuOpen ? 'flex' : 'hidden'} md:flex w-full md:w-64 bg-indigo-900 text-white flex-col md:absolute md:relative z-30 h-full shadow-xl`}>
         <div className="p-6 hidden md:flex items-center gap-3">
           <div className="w-10 h-10 bg-indigo-800 rounded-xl flex items-center justify-center">
@@ -180,7 +197,6 @@ export default function AvatarPage() {
         </div>
       </aside>
 
-      {/* LIENZO 3D Y CONTROLES */}
       <main className="flex-1 flex flex-col h-screen overflow-hidden bg-slate-900 relative">
         <div className="absolute inset-0 z-0">
           <Canvas camera={{ position: [0, 1.5, 6], fov: 45 }}>
@@ -195,13 +211,11 @@ export default function AvatarPage() {
           </Canvas>
         </div>
         
-        {/* PANEL DE INTERACCIÓN */}
         <div className="absolute bottom-0 left-0 right-0 p-4 md:p-0 md:top-6 md:right-6 md:left-auto md:bottom-auto md:w-[420px] z-10 pointer-events-auto">
              <div className="bg-slate-800/90 backdrop-blur-md p-5 md:p-6 rounded-3xl border border-slate-700 shadow-2xl mb-4 md:mb-0">
                 <h1 className="text-xl font-bold text-white mb-2">Intérprete Virtual 3D</h1>
                 <p className="text-slate-400 text-sm mb-4 hidden md:block">Dicta o escribe un texto para ver la simulación de señas.</p>
                 
-                {/* Caja de texto + Botón de Micrófono Integrado */}
                 <div className="relative mb-4">
                   <textarea 
                     rows={3}
@@ -211,7 +225,6 @@ export default function AvatarPage() {
                     className="w-full p-4 pr-14 bg-slate-900/60 border-2 border-slate-700 rounded-2xl text-white outline-none focus:border-emerald-500 resize-none font-medium placeholder:text-slate-500"
                   ></textarea>
                   
-                  {/* Botón Flotante del Micrófono */}
                   <button 
                     onClick={toggleListening}
                     className={`absolute bottom-4 right-4 p-3 rounded-xl transition-all shadow-md ${
@@ -225,7 +238,6 @@ export default function AvatarPage() {
                   </button>
                 </div>
 
-                {/* Botones de Acción */}
                 <div className="flex gap-3">
                   <button 
                     onClick={simulateTranslation}
