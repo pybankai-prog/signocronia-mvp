@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { BrainCircuit, Volume2, Activity, Eye, Menu, X, ArrowRight, Sparkles, Mic, ShieldCheck, Globe, Users } from 'lucide-react';
+import { BrainCircuit, Volume2, Activity, Eye, Menu, X, ArrowRight, Sparkles, Mic, ShieldCheck, Globe, Users, Ear } from 'lucide-react';
 
 export default function LandingPage() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -39,7 +39,6 @@ export default function LandingPage() {
           </div>
         </div>
 
-        {/* Menú Móvil */}
         {isMobileMenuOpen && (
           <div className="md:hidden bg-white border-b border-slate-200 px-4 pt-2 pb-6 shadow-xl absolute w-full left-0 animate-in slide-in-from-top-2">
             <a href="#impacto" onClick={() => setIsMobileMenuOpen(false)} className="block text-slate-600 font-medium py-3 border-b border-slate-100">Impacto Social</a>
@@ -60,11 +59,11 @@ export default function LandingPage() {
             </div>
             
             <h1 className="text-4xl md:text-6xl lg:text-7xl font-extrabold tracking-tight text-slate-900 mb-8 leading-tight">
-              Educación y Accesibilidad Sin Barreras impulsadas por <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-teal-500">Inteligencia Artificial</span>
+              Educación Sin Barreras para la <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-teal-500">Diversidad Humana</span>
             </h1>
             
             <p className="text-lg md:text-xl text-slate-600 mb-12 leading-relaxed px-4 md:px-12 font-medium">
-              Signocronía no es solo un software, es un ecosistema de empoderamiento. Transformamos información compleja en experiencias multisensoriales a través de resúmenes cognitivos, síntesis de voz, dactilología holográfica y tecnología háptica.
+              Diseñada para la comunidad sorda, muda, personas ciegas y adultos mayores. Transformamos la información a través de Inteligencia Artificial, síntesis de voz nativa y dactilología holográfica.
             </p>
             
             <div className="flex flex-col sm:flex-row items-center justify-center gap-5 px-4 sm:px-0">
@@ -77,45 +76,54 @@ export default function LandingPage() {
             </div>
           </div>
         </div>
-        
-        {/* Decoración de fondo */}
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] md:w-[1000px] md:h-[1000px] bg-gradient-to-tr from-indigo-100/60 to-teal-50/60 rounded-full blur-3xl -z-10 pointer-events-none"></div>
       </section>
 
-      {/* ---------------- SECCIÓN DE IMPACTO SOCIAL (NUEVA) ---------------- */}
+      {/* ---------------- SECCIÓN DE IMPACTO SOCIAL (CORREGIDA) ---------------- */}
       <section id="impacto" className="py-24 bg-slate-900 text-white relative overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-5xl font-bold mb-6">Diseñado para incluir a todos</h2>
             <p className="text-slate-400 max-w-3xl mx-auto text-lg leading-relaxed">
-              La tecnología pierde su propósito si deja a las minorías atrás. Hemos construido interfaces adaptativas que responden a las necesidades específicas de cada grupo poblacional.
+              La tecnología pierde su propósito si deja a las minorías atrás. Hemos construido interfaces que responden a las necesidades específicas de cada grupo.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="bg-slate-800/50 p-8 rounded-3xl border border-slate-700 hover:bg-slate-800 transition-colors">
-              <Globe className="w-12 h-12 text-teal-400 mb-6" />
-              <h3 className="text-2xl font-bold mb-4">Comunidad Sorda y Ciega</h3>
-              <p className="text-slate-400 leading-relaxed">
-                Nuestra Inteligencia Artificial traduce textos a dactilología en 3D mediante WebGL y utiliza la API de vibración de los dispositivos móviles para transmitir información en código Morse y Braille lineal.
-              </p>
-            </div>
+          {/* Cambié a 4 columnas para que nadie se quede afuera */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             
-            <div className="bg-slate-800/50 p-8 rounded-3xl border border-slate-700 hover:bg-slate-800 transition-colors">
-              <Users className="w-12 h-12 text-amber-400 mb-6" />
-              <h3 className="text-2xl font-bold mb-4">Adultos Mayores</h3>
-              <p className="text-slate-400 leading-relaxed">
-                Interfaces de ultra-alto contraste, botones maximizados y un asistente conversacional empático diseñado para guiar paso a paso, combatir la brecha digital y cuidar la fatiga visual.
+            <div className="bg-slate-800/50 p-6 rounded-3xl border border-slate-700 hover:bg-slate-800 transition-colors">
+              <Globe className="w-10 h-10 text-teal-400 mb-5" />
+              <h3 className="text-xl font-bold mb-3">Comunidad Sorda y Muda</h3>
+              <p className="text-slate-400 text-sm leading-relaxed">
+                El motor WebGL 3D proyecta Lengua de Señas (LSP) y dactilología espacial interactiva para facilitar la comunicación bidireccional.
               </p>
             </div>
 
-            <div className="bg-slate-800/50 p-8 rounded-3xl border border-slate-700 hover:bg-slate-800 transition-colors">
-              <ShieldCheck className="w-12 h-12 text-indigo-400 mb-6" />
-              <h3 className="text-2xl font-bold mb-4">Estudiantes y Profesionales</h3>
-              <p className="text-slate-400 leading-relaxed">
-                Procesamiento de Lenguaje Natural (NLP) capaz de leer documentos complejos en formato PDF o TXT y generar resúmenes ejecutivos precisos, optimizando el tiempo de aprendizaje.
+            <div className="bg-slate-800/50 p-6 rounded-3xl border border-slate-700 hover:bg-slate-800 transition-colors">
+              <Ear className="w-10 h-10 text-rose-400 mb-5" />
+              <h3 className="text-xl font-bold mb-3">Personas Ciegas</h3>
+              <p className="text-slate-400 text-sm leading-relaxed">
+                Lectura automatizada mediante síntesis de voz nativa y traducción física de hardware a Braille Lineal para quienes presentan sordoceguera.
               </p>
             </div>
+            
+            <div className="bg-slate-800/50 p-6 rounded-3xl border border-slate-700 hover:bg-slate-800 transition-colors">
+              <Users className="w-10 h-10 text-amber-400 mb-5" />
+              <h3 className="text-xl font-bold mb-3">Adultos Mayores</h3>
+              <p className="text-slate-400 text-sm leading-relaxed">
+                Interfaces de ultra-alto contraste y un asistente conversacional paciente por voz, diseñado para romper la brecha tecnológica.
+              </p>
+            </div>
+
+            <div className="bg-slate-800/50 p-6 rounded-3xl border border-slate-700 hover:bg-slate-800 transition-colors">
+              <ShieldCheck className="w-10 h-10 text-indigo-400 mb-5" />
+              <h3 className="text-xl font-bold mb-3">Estudiantes</h3>
+              <p className="text-slate-400 text-sm leading-relaxed">
+                Procesamiento de Inteligencia Artificial capaz de leer PDFs densos y estructurar resúmenes exactos para optimizar el aprendizaje.
+              </p>
+            </div>
+
           </div>
         </div>
       </section>
@@ -126,7 +134,7 @@ export default function LandingPage() {
           <div className="text-center mb-20">
             <h2 className="text-3xl md:text-5xl font-bold text-slate-900 mb-6">Arquitectura Tecnológica Profunda</h2>
             <p className="text-slate-600 max-w-3xl mx-auto text-lg leading-relaxed">
-              Signocronía se apoya en cuatro motores fundamentales de desarrollo avanzado (DeepTech) para garantizar un despliegue rápido, seguro y universal.
+              Signocronía se apoya en cuatro motores fundamentales de desarrollo avanzado (DeepTech).
             </p>
           </div>
 
@@ -137,7 +145,7 @@ export default function LandingPage() {
               </div>
               <h3 className="text-xl font-bold text-slate-900 mb-4">Motor de Inteligencia Artificial</h3>
               <p className="text-slate-600 leading-relaxed text-sm">
-                Integración directa con modelos generativos de última generación. Analiza semánticamente la información para reestructurarla en formatos más fáciles de digerir.
+                Analiza semánticamente la información para reestructurarla en formatos más fáciles de digerir.
               </p>
             </div>
 
@@ -147,7 +155,7 @@ export default function LandingPage() {
               </div>
               <h3 className="text-xl font-bold text-slate-900 mb-4">Síntesis de Voz Nativa</h3>
               <p className="text-slate-600 leading-relaxed text-sm">
-                Implementación de la Web Speech API para convertir texto a audio en tiempo real, adaptado con acento local y controles de velocidad para discapacidad visual.
+                Web Speech API para convertir texto a audio, vital para personas con ceguera y adultos mayores.
               </p>
             </div>
 
@@ -157,7 +165,7 @@ export default function LandingPage() {
               </div>
               <h3 className="text-xl font-bold text-slate-900 mb-4">Traductor Háptico Universal</h3>
               <p className="text-slate-600 leading-relaxed text-sm">
-                Algoritmos matemáticos que sincronizan el texto con el motor físico del hardware (celulares/tablets) para emitir pulsaciones táctiles interpretables.
+                Sincroniza el texto con el motor físico del hardware para emitir pulsaciones táctiles a través de la piel.
               </p>
             </div>
 
@@ -167,7 +175,7 @@ export default function LandingPage() {
               </div>
               <h3 className="text-xl font-bold text-slate-900 mb-4">Renderizado WebGL 3D</h3>
               <p className="text-slate-600 leading-relaxed text-sm">
-                Uso de React Three Fiber y Computer Vision (Lectura de manos por IA) para proyectar un avatar holográfico procedural que interactúa con el usuario.
+                Computer Vision y un avatar holográfico para comunicarse con la comunidad muda y sorda mediante señas.
               </p>
             </div>
           </div>
@@ -179,9 +187,8 @@ export default function LandingPage() {
         <div className="max-w-5xl mx-auto px-4 text-center">
           <h2 className="text-3xl font-bold text-white mb-6">Asistente Especializado para la Tercera Edad</h2>
           <p className="text-indigo-200 mb-10 max-w-2xl mx-auto text-lg">
-            Hemos configurado un agente de Inteligencia Artificial que comprende las necesidades del adulto mayor. Es paciente, responde con voz, usa letras grandes y cuida su bienestar.
+            Hemos configurado un agente de Inteligencia Artificial paciente que responde con voz y usa letras grandes.
           </p>
-          
           <Link 
             href="/adultos-mayores" 
             className="inline-flex items-center justify-center gap-3 bg-amber-400 hover:bg-amber-500 text-slate-900 px-10 py-5 rounded-2xl font-bold text-xl transition-transform hover:scale-105 shadow-[0_10px_20px_rgba(0,0,0,0.3)]"

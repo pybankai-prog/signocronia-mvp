@@ -2,11 +2,8 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
-import { Mic, MicOff, Volume2, ArrowLeft, Send, Loader2 } from 'lucide-react';
+import { Mic, MicOff, Volume2, ArrowLeft, Send, Loader2, AlertCircle } from 'lucide-react';
 import { GoogleGenerativeAI } from '@google/generative-ai';
-
-// Inicializar Gemini con la llave de tu archivo .env.local
-const genAI = new GoogleGenerativeAI(process.env.NEXT_PUBLIC_GEMINI_API_KEY || '');
 
 export default function AdultosMayoresPage() {
   const [mensaje, setMensaje] = useState('');
@@ -17,28 +14,42 @@ export default function AdultosMayoresPage() {
   const recognitionRef = useRef<any>(null);
   const chatFinalRef = useRef<HTMLDivElement>(null);
 
-  // Auto-scroll al último mensaje
   useEffect(() => {
     chatFinalRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [historial]);
 
+  // Hack para desbloquear el audio en navegadores estrictos
+  const desbloquearAudio = () => {
+    if ('speechSynthesis' in window) {
+      const dummy = new SpeechSynthesisUtterance('');
+      window.speechSynthesis.speak(dummy);
+    }
+  };
+
   const enviarMensaje = async (textoAEnviar: string) => {
     if (!textoAEnviar.trim()) return;
 
-    // Agregar el mensaje del usuario a la pantalla
+    // Desbloqueamos el audio en el primer clic
+    if (historial.length === 0) desbloquearAudio();
+
     const nuevoHistorial = [...historial, { rol: 'usuario', texto: textoAEnviar }];
     setHistorial(nuevoHistorial);
     setMensaje('');
     setIsCargando(true);
 
     try {
-      // Configuración de GEMINI con el PROMPT para TERCERA EDAD
+      // 1. VERIFICAR QUE LA LLAVE EXISTA
+      const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
+      if (!apiKey) {
+        throw new Error("Falta la Llave de API. Por favor, asegúrate de haber creado el archivo .env.local y de haber REINICIADO tu servidor (Ctrl+C y npm run dev).");
+      }
+
+      const genAI = new GoogleGenerativeAI(apiKey);
       const model = genAI.getGenerativeModel({ 
         model: 'gemini-1.5-flash',
         systemInstruction: "Eres un asistente virtual diseñado exclusivamente para adultos mayores. Tu objetivo es acompañar y ayudar. Tono: extremadamente paciente, respetuoso (trata de 'Usted'), afectuoso. Regla ESTRICTA: Tus respuestas deben ser MUY cortas (máximo 2 o 3 oraciones). Cero palabras técnicas, cero anglicismos (no digas link, app, click). Si el usuario se frustra, cálmalo diciendo 'No se preocupe, vamos paso a paso'. Cada cierto tiempo recuérdale beber agua o descansar la vista."
       });
 
-      // Enviamos el historial de la conversación para que tenga memoria
       const chat = model.startChat({
         history: nuevoHistorial.filter(m => m.rol !== 'sistema').map(m => ({
           role: m.rol === 'usuario' ? 'user' : 'model',
@@ -50,29 +61,33 @@ export default function AdultosMayoresPage() {
       const respuestaIA = result.response.text();
 
       setHistorial([...nuevoHistorial, { rol: 'asistente', texto: respuestaIA }]);
-      leerEnVozAlta(respuestaIA); // La IA le habla automáticamente al abuelo
+      leerEnVozAlta(respuestaIA); 
 
-    } catch (error) {
-      console.error(error);
-      setHistorial([...nuevoHistorial, { rol: 'asistente', texto: 'Perdón, tuve un pequeño problema técnico. ¿Podría repetirme lo que dijo?' }]);
+    } catch (error: any) {
+      console.error("Error técnico de Gemini:", error);
+      const motivo = error.message || "Error desconocido de conexión.";
+      setHistorial([...nuevoHistorial, { rol: 'sistema', texto: `⚠️ Problema Técnico: ${motivo}` }]);
     } finally {
       setIsCargando(false);
     }
   };
 
-  // Lector de Voz (La IA responde hablando)
   const leerEnVozAlta = (texto: string) => {
     if ('speechSynthesis' in window) {
       window.speechSynthesis.cancel();
-      const utterance = new SpeechSynthesisUtterance(texto);
+      // Quitamos emojis e íconos para que la voz no los lea raro
+      const textoLimpio = texto.replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F700}-\u{1F77F}\u{1F780}-\u{1F7FF}\u{1F800}-\u{1F8FF}\u{1F900}-\u{1F9FF}\u{1FA00}-\u{1FA6F}\u{1FA70}-\u{1FAFF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{2300}-\u{23FF}]/gu, '');
+      
+      const utterance = new SpeechSynthesisUtterance(textoLimpio);
       utterance.lang = 'es-ES';
-      utterance.rate = 0.9; // Habla un poco más lento para que entiendan mejor
+      utterance.rate = 0.9;
       window.speechSynthesis.speak(utterance);
     }
   };
 
-  // Micrófono (Para que el abuelo hable en lugar de escribir)
   const toggleMicrofono = () => {
+    if (historial.length === 0) desbloquearAudio();
+    
     if (isEscuchando) {
       if (recognitionRef.current) recognitionRef.current.stop();
       setIsEscuchando(false);
@@ -95,7 +110,7 @@ export default function AdultosMayoresPage() {
     
     recognition.onresult = (event: any) => {
       const transcripcion = event.results[0][0].transcript;
-      enviarMensaje(transcripcion); // Envía el mensaje automáticamente al terminar de hablar
+      enviarMensaje(transcripcion); 
     };
 
     recognition.onerror = () => setIsEscuchando(false);
@@ -106,7 +121,6 @@ export default function AdultosMayoresPage() {
 
   return (
     <div className="min-h-screen bg-[#003366] font-sans flex flex-col">
-      {/* Cabecera GIGANTE */}
       <header className="bg-[#002244] p-6 shadow-md flex items-center gap-6">
         <Link href="/" className="bg-white/10 p-4 rounded-full text-white hover:bg-white/20 transition-colors">
           <ArrowLeft className="w-8 h-8 md:w-12 md:h-12" />
@@ -117,8 +131,7 @@ export default function AdultosMayoresPage() {
         </div>
       </header>
 
-      {/* Historial de Chat (Letras gigantes) */}
-      <main className="flex-1 p-6 md:p-10 overflow-y-auto space-y-8 max-w-5xl mx-auto w-full">
+      <main className="flex-1 p-6 md:p-10 overflow-y-auto space-y-8 max-w-5xl mx-auto w-full pb-32">
         {historial.length === 0 && (
           <div className="text-center mt-20">
             <Volume2 className="w-24 h-24 text-white/20 mx-auto mb-6" />
@@ -133,8 +146,11 @@ export default function AdultosMayoresPage() {
             <div className={`p-6 md:p-8 rounded-3xl max-w-[85%] shadow-lg ${
               msg.rol === 'usuario' 
               ? 'bg-blue-500 text-white rounded-br-none' 
+              : msg.rol === 'sistema'
+              ? 'bg-rose-100 text-rose-800 border-4 border-rose-400 rounded-bl-none'
               : 'bg-white text-black rounded-bl-none border-4 border-yellow-400'
             }`}>
+              {msg.rol === 'sistema' && <AlertCircle className="w-10 h-10 mb-4 text-rose-600" />}
               <p className="text-2xl md:text-4xl font-medium leading-normal">{msg.texto}</p>
             </div>
           </div>
@@ -150,8 +166,7 @@ export default function AdultosMayoresPage() {
         <div ref={chatFinalRef} />
       </main>
 
-      {/* Panel Inferior (Botones inmensos) */}
-      <footer className="bg-[#002244] p-6 md:p-10 border-t-8 border-yellow-400">
+      <footer className="bg-[#002244] p-6 md:p-10 border-t-8 border-yellow-400 fixed bottom-0 w-full z-10">
         <div className="max-w-5xl mx-auto flex flex-col md:flex-row gap-6">
           <button 
             onClick={toggleMicrofono}
